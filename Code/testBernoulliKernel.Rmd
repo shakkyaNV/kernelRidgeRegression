@@ -1,0 +1,46 @@
+---
+title: "testBernoulliKernel"
+author: "Shakkya Ranasinghe"
+date: "2023-09-08"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+here::i_am("Code/testBernoulliKernel.Rmd")
+GInv <- MASS::ginv
+```
+
+# Will attach more descriptive note late
+
+Note contains 
+  + Penalized likelihood method and its relation to this code 
+  + Whats a reproducing kernel 
+  + Bernoulli Reproducing Kernel (what is a Bernoulli polynomial and kernel) 
+  + Matrix Algebra computation
+
+# X and function values 
+```{r model}
+n = 100
+x <- seq(1, pi, length.out = n)
+y <- sin(x*4)
+plot(x, y)
+```
+
+
+
+# Bernoulli Reproducing Kernel
+
+We need the Bernoulli polynomials to create the Kernel. In the kernel we will take m=2, so we'll need to build kernel for 0, 1, 2, 3, 4 (B~2m~)
+
+```{r berPolynomial}
+b0 = 1
+b1 = x - 1/2
+b2 = x^2 - x + 1/6
+b3 = x^3 - 3/2*x^2 + 1/2*x
+b4 = x^4 - 2*x^3 + x^2 - 1/30
+```
+
+
+
+
