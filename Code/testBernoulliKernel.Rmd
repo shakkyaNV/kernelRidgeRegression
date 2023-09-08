@@ -34,13 +34,76 @@ plot(x, y)
 We need the Bernoulli polynomials to create the Kernel. In the kernel we will take m=2, so we'll need to build kernel for 0, 1, 2, 3, 4 (B~2m~)
 
 ```{r berPolynomial}
-b0 = 1
-b1 = x - 1/2
-b2 = x^2 - x + 1/6
-b3 = x^3 - 3/2*x^2 + 1/2*x
-b4 = x^4 - 2*x^3 + x^2 - 1/30
+m = 2
+v = m*2
+
+b0 <- function(x) {
+  return(rep(1, n))
+}
+b1 <- function(x) {
+  return(x - 1/2)
+}
+b2 <- function(x) {
+  return(x^2 - x + 1/6)
+}
+b3 <- function(x) {
+  return(x^3 - 3/2*x^2 + 1/2*x)
+}
+b4 <- function(x) {
+  return(x^4 - 2*x^3 + x^2 - 1/30)
+}
+```
+
+Build the Kernel
+
+```{r kernel}
+require(rlang)
+require(magrittr, quietly = TRUE) # masking set_names from rlang
+
+bernoulliKernel <- function(x, y, v = 4) {
+  # Check
+  if (length(x) != length(y)) {
+    stop("x and y should be of same length")
+  }
+  rKernel = 1
+  for (i in 1:v-1) {
+    textToEval <- paste0("b", v) # create the function name
+    ((textToEval %>%
+        call2(., x = x) %>% eval()) + # call2 creates a function, eval evaluates
+        (textToEval %>%
+           call2(., x = y) %>% eval())) / (factorial(v) ^ 2)
+  }
+  
+  rKernel = rKernel + ((-1) ^ (m - 1)) * (b4(abs(x - y)) / (factorial(2 * m)))
+  return(rKernel)
+}
+
+kernel = bernoulliKernel(x, y, v = 4)
 ```
 
 
+Fitting the values with `Bernoulli Kernel`
 
+```{r fHat}
+lambda = 1/(10**3)
+kernel = r
+I = diag(n)
+# Coefficient
+coef <- (kernel + lambda*I) %>% GInv()
+coef <- coef %*% matrix(y)
+
+# phi (not sure about this)
+phi <- kernel %>% matrix()
+
+# fitted values according to our model
+fHat = (phi) * coef
+fHat %>% c() -> fHat
+```
+
+Check fit with different `lambda` values and `n`
+
+```{r}
+plot(x, y)
+lines(x, fHat)
+```
 
