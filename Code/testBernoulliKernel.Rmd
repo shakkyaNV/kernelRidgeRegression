@@ -8,8 +8,12 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 here::i_am("Code/testBernoulliKernel.Rmd")
+
 GInv <- MASS::ginv
 f <- glue::glue
+
+require(rlang)
+require(magrittr, quietly = TRUE) # masking set_names from rlang
 ```
 
 # Will attach more descriptive note late
@@ -23,8 +27,8 @@ Note contains
 # X and function values 
 ```{r model}
 n = 100
-x <- seq(1, pi, length.out = n)
-y <- sin(x*6) # + rnorm(100, 0, 0.2)
+x <- runif(n, 0, 1) # Assume these are our observations
+y <- sin(x*12) + rnorm(100, 0, 0.2)  # Assume these are our observations
 plot(x, y)
 ```
 
@@ -36,7 +40,6 @@ We need the Bernoulli polynomials to create the Kernel. In the kernel we will ta
 
 ```{r berPolynomial}
 m = 2
-v = m*2 # why did we define this?
 
 b0 <- function(x) {
   return(rep(1, n))
@@ -55,55 +58,58 @@ b4 <- function(x) {
 }
 ```
 
-Build the Kernel
+Build the Kernel. Refer to [textbook pg 10](https://arxiv.org/pdf/2308.13905.pdf)
 
 ```{r kernel}
-require(rlang)
-require(magrittr, quietly = TRUE) # masking set_names from rlang
-
-bernoulliKernel <- function(x, y, m = 2) {
+bernoulliKernel <- function(x, y, m=2) {
   # Check
   if (length(x) != length(y)) {
     stop("x and y should be of same length")
   }
+  if (m > 2) {
+    stop("Bernoulli Kernel defined only upto 4: (4=m*2)")
+  }
   rKernel = 1
-  for (v in 1:m) { # or is it m-1
+  for (v in 1:m) { 
     textToEval <- paste0("b", v) # create the function name
-    f("Making Evaluation call {textToEval}") %>% print()
     rKernel = rKernel + 
       ((textToEval %>%
-        call2(., x = x) %>% eval()) + # call2 creates a function, eval evaluates
+        call2(., x = x) %>% eval()) + # call2 creates a function call, eval evaluates
         (textToEval %>%
            call2(., x = y) %>% eval())) / (factorial(v) ^ 2)
-  }
-  m = 2
+  } 
+  
   lastCall = paste0("b", 2*m) %>% call2(., x=abs(x-y)) 
   rKernel = rKernel + ((-1) ^ (m - 1)) * ((lastCall %>% eval()) / (factorial(2 * m)))
   return(rKernel)
 }
 
-kernel = bernoulliKernel(x, y, m = 3)
+kernel = bernoulliKernel(x, x, m = m)
 ```
 
 
 Fitting the values with `Bernoulli Kernel`
 
 ```{r fHat}
-lambda = 1/(10**2)
-I = diag(n)
+lambda = 1/(10**5) # higher lambda (lower power) makes a naive fit. Optimal is around 5. Even lower lambda would make a jagged fit (exact fit to each observation)
+I = diag(1, nrow = 100)
+R = outer(x, x, FUN = bernoulliKernel, m = m)
+# we're passing m as an argument to bernoulliKernel function
+# we're taking the outer product of 
+
 # Coefficient
-coef <- (kernel + n*lambda*I) %>% GInv()
+coef <- (R + n*lambda*I) %>% GInv()
 coef <- coef %*% matrix(y)
 
 # phi (not sure about this)
-phi <- kernel %>% matrix()
+phi <- R
 
 # fitted values according to our model
-fHat = (phi) * coef
+fHat = phi %*% coef
 fHat %>% c() -> fHat
 ```
 
-Check fit with different `lambda` values and `n`
+Plot to see the goodness of fit.
 
 ```{r}
 require(dplyr)
@@ -112,11 +118,11 @@ require(ggplot2)
 dfOri <- tibble(x, y)
 dfFit <- tibble(x, fHat)
 dfOri %>% 
-  left_join(dfFit, by = 'x') %>% reshape2::melt(id = 'x') %>% 
+  left_join(dfFit, by='x') %>%  # get the corresponding fitted value to x
+  reshape2::melt(id='x') %>% # flatten the table so that we can plot as one variable but two groups
   ggplot() + 
-  geom_point(aes(x=x, y =value, col = variable))
-  
-  
+  geom_point(aes(x=x, y=value, col=variable))
+
 ```
 ```{r}
 print("this")
