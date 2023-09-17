@@ -1,0 +1,142 @@
+---
+title: "Generalized Cross Validation"
+author: "Shakkya Ranasinghe"
+date: "2023-09-17"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+require(magrittr)
+require(rlang)
+require(here)
+
+GInv <- MASS::ginv
+f <- glue::glue
+
+i_am("Code/gcv.Rmd")
+source(here("Code/utils.R"))
+```
+
+
+# Specify model
+
+```{r model}
+n = 100
+
+modelSp <- function(n=100) {
+  x = runif(n, 0, 1)
+  y = sin(x*24) + rnorm(n, 0, 0.2)
+  return(list(x=x, y=y))
+}
+
+modelvals = modelSp(n)
+x = modelvals$x
+y = modelvals$y
+tibble(x, y) |> 
+    ggplot() + 
+    geom_point(aes(x=x, y=y), color = "Steelblue4") + 
+    labs(title = "Starting data: x & y") + 
+    theme_classic()
+```
+```{r kernel}
+kernel <- bernoulliKernel
+
+logLambda <- seq(-10, 10, length = 50)
+listLambda <- exp(logLambda)
+```
+
+
+Compute fitted value for each lambda iteratively. 
+
+```{r}
+fitValues <- function(x, y, lambda, kernel) {
+  I = diag(1, nrow = length(y))
+  R = outer(x, x, FUN = kernel)
+  
+  coef <- (R + n*lambda*I) |> GInv()
+  coef <- coef %*% matrix(y)
+  
+  phi <- R
+  fHat <- (t(phi) %*% coef) |> c()
+  S = t(phi)%*%((R+n*lambda*I) |> GInv())
+  return(list(fHat, S))
+}
+
+df = tibble(x=x)
+sf = tibble(lambda = purrr::map_chr(round(listLambda, 5), f))
+
+for (i in 1:length(listLambda)) {
+  lambda = listLambda[i]
+  # assign("name", f("{round(lambda, 5)}"))
+  f("Calculating fitted value for lambda: {lambda}") |> print()
+  # varName = f("fHat_{i}")
+  valuesReturn = fitValues(x,y,lambda, kernel)
+  valuesReturn[1][[1]] -> vals
+  valuesReturn[2][[1]] -> s
+  df[, i+1] <- vals
+  sf[i, 2] <- nest(as.data.frame(s))
+}
+
+colnames(df) <- c("x", purrr::map2_chr("fHat", seq(1:50), .f = f))
+df |> 
+  head()
+
+sf |> 
+  head()
+```
+
+```{r gcv}
+gcv = vector()
+df |> 
+  mutate(across(fHat1:fHat50, ~ sum((x-.x)^2)/n)) |> 
+  select(-x) |> 
+  slice(1) |> 
+  unlist() -> fitGCV
+
+for (i in 1:nrow(sf)) {
+  gcv[i] <- fitGCV[i] / { 1- (
+    sum(diag( # trace
+      sf[i, 2] |> unnest(cols=c(data)) |> as.matrix()
+    )) / (n)
+      )^2}
+}
+
+gcv |> as_tibble_col(column_name = "gcv") |> 
+  bind_cols(as_tibble_col(listLambda, column_name = "lambdaValue")) |> 
+  arrange(gcv) |> 
+  head(5) -> minGCV
+
+minGCV |> 
+  mutate(lambdaValue = as.character(round(lambdaValue, 4))) |>
+  mutate(count = c(rep(10, 5))) |> 
+  uncount(count)  |>  
+  reshape2::melt(id = "lambdaValue") |> 
+  bind_cols(as_tibble_col(rep(seq(1:10), 5), column_name = "index")) |>
+  ggplot() + 
+  geom_line(aes(x=index, y = value, col=lambdaValue), lwd = 2) + 
+  labs(color = "Lambda Value", y = "GCV")
+
+```
+
+```{r}
+f("Best Fit is given with lambda value: {round(minGCV[{which.min(minGCV$gcv)}, 2] |> pull(), 4)}") |> 
+  print()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
