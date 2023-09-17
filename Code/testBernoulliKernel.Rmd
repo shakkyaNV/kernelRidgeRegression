@@ -8,12 +8,14 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 here::i_am("Code/testBernoulliKernel.Rmd")
+source(here::here("Code/utils.R"))
 
 GInv <- MASS::ginv
 f <- glue::glue
 
 require(rlang)
 require(magrittr, quietly = TRUE) # masking set_names from rlang
+
 ```
 
 # Will attach more descriptive note late
@@ -41,48 +43,17 @@ We need the Bernoulli polynomials to create the Kernel. In the kernel we will ta
 ```{r berPolynomial}
 m = 2
 
-b0 <- function(x) {
-  return(rep(1, n))
-}
-b1 <- function(x) {
-  return(x - 1/2)
-}
-b2 <- function(x) {
-  return(x^2 - x + 1/6)
-}
-b3 <- function(x) {
-  return(x^3 - 3/2*x^2 + 1/2*x)
-}
-b4 <- function(x) {
-  return(x^4 - 2*x^3 + x^2 - 1/30)
-}
+b0 <- b0 # From utils
+b1 <- b1
+b2 <- b2
+b3 <- b3
+b4 <- b4
 ```
 
 Build the Kernel. Refer to [textbook pg 10](https://arxiv.org/pdf/2308.13905.pdf)
 
 ```{r kernel}
-bernoulliKernel <- function(x, y, m=2) {
-  # Check
-  if (length(x) != length(y)) {
-    stop("x and y should be of same length")
-  }
-  if (m > 2) {
-    stop("Bernoulli Kernel defined only upto 4: (4=m*2)")
-  }
-  rKernel = 1
-  for (v in 1:m) { 
-    textToEval <- paste0("b", v) # create the function name
-    rKernel = rKernel + 
-      ((textToEval %>%
-        call2(., x = x) %>% eval()) + # call2 creates a function call, eval evaluates
-        (textToEval %>%
-           call2(., x = y) %>% eval())) / (factorial(v) ^ 2)
-  } 
-  
-  lastCall = paste0("b", 2*m) %>% call2(., x=abs(x-y)) 
-  rKernel = rKernel + ((-1) ^ (m - 1)) * ((lastCall %>% eval()) / (factorial(2 * m)))
-  return(rKernel)
-}
+bernoulliKernel <- bernoulliKernel # from utils
 
 kernel = bernoulliKernel(x, x, m = m)
 ```
@@ -105,7 +76,7 @@ coef <- coef %*% matrix(y)
 phi <- R
 
 # fitted values according to our model
-fHat = phi %*% coef
+fHat = t(phi) %*% coef
 fHat %>% c() -> fHat
 ```
 
