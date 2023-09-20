@@ -27,7 +27,7 @@ n = 100
 
 modelSp <- function(n=100) {
   x = runif(n, 0, 1)
-  y = sin(x*8) + rnorm(n, 0, 0.2)
+  y = sin(x*3) + rnorm(n, 0, 0.2)
   return(list(x=x, y=y))
 }
 
@@ -91,7 +91,10 @@ Calculate cross validation value [GCV](https://stats.stackexchange.com/questions
 ```{r gcv}
 gcv = vector()
 df |> 
-  mutate(across(fHat1:fHat50, ~ sum(y-.x))) |> 
+  mutate(
+    across(fHat1:fHat50, ~ sum((y-.x)^2)
+           )
+         ) |> 
   select(-x) |> 
   slice(1) |> 
   unlist() -> fitGCV
@@ -103,8 +106,8 @@ for (i in 1:nrow(sf)) {
     sum(diag( # trace
       sf[i, 2] |> unnest(cols=c(data)) |> as.matrix() # = S
     )) / (n)
-    )}
-  }^2 / (n)
+    )}^2
+  } / (n)
 }
 
 gcv |> as_tibble_col(column_name = "gcv") |> 
