@@ -8,7 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-require(magrittr)
+require(tidyverse)
 require(rlang)
 require(here)
 
@@ -27,7 +27,7 @@ n = 100
 
 modelSp <- function(n=100) {
   x = runif(n, 0, 1)
-  y = sin(x*24) + rnorm(n, 0, 0.2)
+  y = sin(x*8) + rnorm(n, 0, 0.2)
   return(list(x=x, y=y))
 }
 
@@ -64,13 +64,13 @@ fitValues <- function(x, y, lambda, kernel) {
   return(list(fHat, S))
 }
 
-df = tibble(x=x)
-sf = tibble(lambda = purrr::map_chr(round(listLambda, 5), f))
+df = tibble(y=y)
+sf = tibble(lambda = purrr::map_chr(listLambda, f))
 
 for (i in 1:length(listLambda)) {
   lambda = listLambda[i]
   # assign("name", f("{round(lambda, 5)}"))
-  f("Calculating fitted value for lambda: {lambda}") |> print()
+  # f("Calculating fitted value for lambda: {lambda}") |> print()
   # varName = f("fHat_{i}")
   valuesReturn = fitValues(x,y,lambda, kernel)
   valuesReturn[1][[1]] -> vals
@@ -86,21 +86,25 @@ df |>
 sf |> 
   head()
 ```
+Calculate cross validation value [GCV](https://stats.stackexchange.com/questions/77527/the-cross-validation-cv-and-the-generalized-cross-validation-gcv-statistics)
 
 ```{r gcv}
 gcv = vector()
 df |> 
-  mutate(across(fHat1:fHat50, ~ sum((x-.x)^2)/n)) |> 
+  mutate(across(fHat1:fHat50, ~ sum(y-.x))) |> 
   select(-x) |> 
   slice(1) |> 
   unlist() -> fitGCV
 
+# calcualte generalized cross validation value 
 for (i in 1:nrow(sf)) {
-  gcv[i] <- fitGCV[i] / { 1- (
+  gcv[i] <- {
+    fitGCV[i] / { 1- (
     sum(diag( # trace
-      sf[i, 2] |> unnest(cols=c(data)) |> as.matrix()
+      sf[i, 2] |> unnest(cols=c(data)) |> as.matrix() # = S
     )) / (n)
-      )^2}
+    )}
+  }^2 / (n)
 }
 
 gcv |> as_tibble_col(column_name = "gcv") |> 
@@ -109,11 +113,11 @@ gcv |> as_tibble_col(column_name = "gcv") |>
   head(5) -> minGCV
 
 minGCV |> 
-  mutate(lambdaValue = as.character(round(lambdaValue, 4))) |>
-  mutate(count = c(rep(10, 5))) |> 
+  mutate(lambdaValue = as.character(lambdaValue)) |> # we wanna display lambda values as category in plot
+  mutate(count = c(rep(10, 5))) |>  # these two steps replicate each row by count many times
   uncount(count)  |>  
   reshape2::melt(id = "lambdaValue") |> 
-  bind_cols(as_tibble_col(rep(seq(1:10), 5), column_name = "index")) |>
+  bind_cols(as_tibble_col(rep(seq(1:10), 5), column_name = "index")) |> # value is GCV value
   ggplot() + 
   geom_line(aes(x=index, y = value, col=lambdaValue), lwd = 2) + 
   labs(color = "Lambda Value", y = "GCV")
@@ -121,13 +125,34 @@ minGCV |>
 ```
 
 ```{r}
-f("Best Fit is given with lambda value: {round(minGCV[{which.min(minGCV$gcv)}, 2] |> pull(), 4)}") |> 
+minlambdaGCV <- minGCV[{which.min(minGCV$gcv)}, 2] |> pull()
+
+f("Best Fit is given with lambda value: {minlambdaGCV}") |> 
   print()
+
+f("Best Fit is given with lambda value: {round(minlambdaGCV, 4)}") |> 
+  print()
+
+minGCV  |>
+  arrange(gcv)
+```
+
+```{r}
+minFitFHat <- fitValues(x=x, y=y, kernel=kernel, lambda=minlambdaGCV)
+
+dfOri <- tibble(x, y)
+dfMinFit <- tibble(x, lambdaWithMinGCV=minFitFHat[[1]])
+dfOri %>% 
+  left_join(dfMinFit, by='x') %>%  # get the corresponding fitted value to x
+  reshape2::melt(id='x') %>% # flatten the table so that we can plot as one variable but two groups
+  ggplot() + 
+  geom_point(aes(x=x, y=value, col=variable))
 ```
 
 
-
-
+```{r}
+print("do this")
+```
 
 
 
