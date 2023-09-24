@@ -1,0 +1,18 @@
+---
+title: "KRR in Multiple Dimensions"
+author: "Shakkya Ranasinghe"
+date: "2023-09-24"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+require(tidyverse)
+require(here)
+
+i_am("Code/multiD.Rmd")
+source(here("Code/utils.R"))
+```
+

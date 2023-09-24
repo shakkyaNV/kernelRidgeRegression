@@ -1,7 +1,10 @@
 ## Util Functions for other codes
 
-## Bernoulli Kernel
+## Utils
+f <- glue::glue
 
+
+## Bernoulli Kernel
 b0 <- function(x) {
   return(rep(1, n))
 }
