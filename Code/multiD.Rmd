@@ -91,14 +91,39 @@ fHat_rmse = Metrics::rmse(fHat, y)
 print(f("Calculated RMSE: {round(fHat_rmse, 2)}"))
 ```
 
-```{r}
-print("upto this")
+```{r visualizex1}
+require(dplyr)
+require(ggplot2)
+
+x <- x1
+dfOri <- tibble(x, y)
+dfFit <- tibble(x, fHat)
+dfOri %>% 
+  left_join(dfFit, by='x') %>%  # get the corresponding fitted value to x
+  reshape2::melt(id='x') %>% # flatten the table so that we can plot as one variable but two groups
+  ggplot() + 
+  geom_point(aes(x=x, y=value, col=variable)) + 
+  labs(title = "(x1,y) and (x1, FHat)")
 ```
 
 
 
+```{r visualizex2}
+x <- x2
+dfOri <- tibble(x, y)
+dfFit <- tibble(x, fHat)
+dfOri %>% 
+  left_join(dfFit, by='x') %>%  # get the corresponding fitted value to x
+  reshape2::melt(id='x') %>% # flatten the table so that we can plot as one variable but two groups
+  ggplot() + 
+  geom_point(aes(x=x, y=value, col=variable)) + 
+  labs(title = "(x2,y) and (x2, FHat)")
+```
 
 
+```{r}
+print("done with this")
+```
 
 
 
