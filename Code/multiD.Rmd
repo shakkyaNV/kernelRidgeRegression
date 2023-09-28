@@ -25,13 +25,13 @@ evalHere <- function(x) {  # since we're going to be using this heavily. A wrapp
 
 ```{r model}
 n = 100
-functionName <- "DGP1"
+functionName <- "DGP2"
 print(formals(functionName))
 
-modelVals = modelSp(functionName, n) # from utils # x returning as matrix, y as list
+modelVals = modelSp(functionName, n) # from utils # x returning as matrix, fx as list
 xargs = modelVals$xargs
 x = modelVals$x
-y = modelVals$y
+fx = modelVals$fx
 
 xDim = min(dim(x))
 for (i in 1:xDim) { # assign each row to x1, x2 ...>
@@ -41,7 +41,7 @@ for (i in 1:xDim) { # assign each row to x1, x2 ...>
 ```
 
 ```{r}
-plot(x1, y)
+plot(x5, fx)
 ```
 
 
@@ -77,7 +77,7 @@ R = mprod(kernel = Rkernel, xdim = xDim, name = "Rkernel", I = I)
 
 ```{r fHat}
 coef <- (R + n*lambda*I) |> GInv()
-coef <- coef %*% matrix(y)
+coef <- coef %*% matrix(fx)
 
 phi <- R
 
@@ -87,7 +87,7 @@ fHat <- {t(phi) %*% coef } |> c()
 
 
 ```{r metrics}
-fHat_rmse = Metrics::rmse(fHat, y)
+fHat_rmse = Metrics::rmse(fHat, fx)
 print(f("Calculated RMSE: {round(fHat_rmse, 2)}"))
 ```
 
@@ -96,28 +96,28 @@ require(dplyr)
 require(ggplot2)
 
 x <- x1
-dfOri <- tibble(x, y)
+dfOri <- tibble(x, fx)
 dfFit <- tibble(x, fHat)
 dfOri %>% 
   left_join(dfFit, by='x') %>%  # get the corresponding fitted value to x
   reshape2::melt(id='x') %>% # flatten the table so that we can plot as one variable but two groups
   ggplot() + 
   geom_point(aes(x=x, y=value, col=variable)) + 
-  labs(title = "(x1,y) and (x1, FHat)")
+  labs(title = "(x1,fx) and (x1, FHat)")
 ```
 
 
 
 ```{r visualizex2}
 x <- x2
-dfOri <- tibble(x, y)
+dfOri <- tibble(x, fx)
 dfFit <- tibble(x, fHat)
 dfOri %>% 
   left_join(dfFit, by='x') %>%  # get the corresponding fitted value to x
   reshape2::melt(id='x') %>% # flatten the table so that we can plot as one variable but two groups
   ggplot() + 
   geom_point(aes(x=x, y=value, col=variable)) + 
-  labs(title = "(x2,y) and (x2, FHat)")
+  labs(title = "(x2, fx) and (x2, FHat)")
 ```
 
 
