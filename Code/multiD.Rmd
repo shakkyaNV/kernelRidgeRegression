@@ -14,5 +14,95 @@ require(here)
 
 i_am("Code/multiD.Rmd")
 source(here("Code/utils.R"))
+ 
+evalHere <- function(x) {  # since we're going to be using this heavily. A wrapper
+  if(!is.character(x)) stop("x should be a string")
+  return(base::eval(base::parse(text=x)))
+}
 ```
+
+# Specify Model
+
+```{r model}
+n = 100
+functionName <- "DGP1"
+print(formals(functionName))
+
+modelVals = modelSp(functionName, n) # from utils # x returning as matrix, y as list
+xargs = modelVals$xargs
+x = modelVals$x
+y = modelVals$y
+
+xDim = min(dim(x))
+for (i in 1:xDim) { # assign each row to x1, x2 ...>
+  assign(f("x{i}"), x[i, ] |> unlist())
+}
+
+```
+
+```{r}
+plot(x1, y)
+```
+
+
+```{r kernelBuilder}
+
+bernoulliKernel <- bernoulliKernel
+lambda = 1e-5 # we will give a constant for now. Later we'll optimize
+I = diag(1, nrow = n)
+Rkernel = c()
+
+for (i in 1:xDim) { # R = list(R1, R2)
+  xi = evalHere(f("x{i}"))
+  print(f("Calculating outer Rkernerl for <x{i}, x{i}>"))
+  assign(f("Rkernel{i}"), outer(xi, xi, bernoulliKernel))
+  Rkernel[f("Rkernel{i}")] = evalHere(f("Rkernel{i}")) |> list()
+}
+
+print(names(Rkernel))
+```
+
+```{r kernel and R}
+mprod <- function(kernel, xdim, name, I) {
+  R <- matrix(rep(1, n*n), nrow = n)
+  for (i in 1:xdim) {
+    R = R * getElement(kernel, f("{name}{i}"))
+  }
+  return(R)
+}
+
+R = mprod(kernel = Rkernel, xdim = xDim, name = "Rkernel", I = I)
+```
+
+
+```{r fHat}
+coef <- (R + n*lambda*I) |> GInv()
+coef <- coef %*% matrix(y)
+
+phi <- R
+
+fHat <- {t(phi) %*% coef } |> c()
+```
+
+
+
+```{r metrics}
+fHat_rmse = Metrics::rmse(fHat, y)
+print(f("Calculated RMSE: {round(fHat_rmse, 2)}"))
+```
+
+```{r}
+print("upto this")
+```
+
+
+
+
+
+
+
+
+
+
+
 
