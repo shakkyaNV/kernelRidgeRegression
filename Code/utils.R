@@ -93,6 +93,46 @@ DGP1 <- function(x, q, beta, b = 1, numXArgs = 2) {
   return(val)
 }
 
+DGP2 <- function(x, q, beta, b = 1, numXArgs = 5) {
+  # we can ignore q, beta, b for now because of lazy eval. 
+  # It won't be evaluated (since it's not needed) and hence 
+  # no question if you don't pass it in to the function
+  # check
+  if(!is.matrix(x)){
+    stop("Input X must be a matrix [2x100]")
+  }
+  if (min(dim(x)) != 5) {
+    stop(f("Input Matrix not of correct Dimension: [2x100]. Input dim: {dim(x)}"))
+  }
+  if (dim(x)[1] != 5) {
+    x = t(x)
+  }
+  
+  numXArgs = min(dim(x))
+  for (i in 1:numXArgs) {
+    assign(paste0("x", i), x[i, ]  %>% unlist())
+  }
+  
+  g01 <- function(x1) {
+    return(5*x1)
+  }
+  g02 <- function(x2) {
+    return(3*((2*x2 - 1)^2))
+  }
+  g03 <- function(x3) {
+    return({4 * sin(2*pi*x3)} / {2 - sin(2*pi*x3)})
+  }
+  g04 <- function(x4) {
+    return(2*x4^3 + min(x4, 0.2) + max(x4, 0.8))
+  }
+  g05 <- function(x5) {
+    return({0.6*sin(2*pi*x5)} + {1.2*cos(2*pi*x5)} +
+           {1.8*(sin(2*pi*x5)^2)} + {2.4*(cos(2*pi*x5)^3)} + 
+           {3*(sin(2*pi*x5)^3)})
+  }
+  val = b*g01(x1) + g02(x2) + g03(x3) + g04(x4) + g05(x5)
+  return(val)
+}
 
 
 ## Pull data into code with
@@ -109,9 +149,9 @@ modelSp <- function(functionName, n, ...) {
   }
   
   x <- matrix(x, ncol = n) # num_x_args x n matrix
-  y <- rlang::call2(functionName, x, ...)  %>% 
+  fx <- rlang::call2(functionName, x, ...)  %>% 
     eval()
-  return(list(x=x, y=y, xargs=xargs))
+  return(list(x=x, fx=fx, xargs=xargs))
 }
 
 
