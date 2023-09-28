@@ -24,16 +24,18 @@ source(here("Code/utils.R"))
 
 ```{r model}
 n = 100
+functionName = "SIN"
 
-modelSp <- function(n=100) {
-  x = runif(n, 0, 1)
-  y = sin(x*3) + rnorm(n, 0, 0.2)
-  return(list(x=x, y=y))
+modelvals = modelSp(functionName, n, power=8)
+x = modelvals$x
+
+for (i in 1:modelvals$xargs) {
+  assign(paste0("x", i), x[i, ]  %>% unlist())
 }
 
-modelvals = modelSp(n)
-x = modelvals$x
+x = x1
 y = modelvals$y
+
 tibble(x, y) |> 
     ggplot() + 
     geom_point(aes(x=x, y=y), color = "Steelblue4") + 
