@@ -10,9 +10,6 @@ knitr::opts_chunk$set(echo = TRUE)
 here::i_am("Code/testBernoulliKernel.Rmd")
 source(here::here("Code/utils.R"))
 
-GInv <- MASS::ginv
-f <- glue::glue
-
 require(rlang)
 require(magrittr, quietly = TRUE) # masking set_names from rlang
 
