@@ -51,11 +51,11 @@ bernoulliKernel <- function(x, y, m=2) {
 
 ## Data Generation Process
 
-SIN <- function(x, power =8, normsd = 0.2, numXArgs = 2) {
+SIN <- function(x, power =8, normsd = 0.2, numXArgs = 1) {
   n = max(dim(x))
   x1 = x[1, ]  %>% unlist()
-  x2 = x[2, ] |> unlist()
-  y = sin(x1*(power)) + rnorm(n, 0, normsd) + sin(x2*(power/2))
+  # x2 = x[2, ] |> unlist()
+  y = sin(x1*(power)) + rnorm(n, 0, normsd) # + sin(x2*(power/2))
   return(y)
 }
 
