@@ -25,7 +25,7 @@ evalHere <- function(x) {  # since we're going to be using this heavily. A wrapp
 
 ```{r model}
 n = 100
-functionName <- "DGP2"
+functionName <- "DGP1"
 print(formals(functionName))
 
 modelVals = modelSp(functionName, n) # from utils # x returning as matrix, fx as list
@@ -41,7 +41,7 @@ for (i in 1:xDim) { # assign each row to x1, x2 ...>
 ```
 
 ```{r}
-plot(x5, fx)
+plot(x1, fx)
 ```
 
 

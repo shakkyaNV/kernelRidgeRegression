@@ -34,7 +34,7 @@ for (i in 1:modelvals$xargs) {
 }
 
 x = x1
-y = modelvals$y
+y = modelvals$fx
 
 tibble(x, y) |> 
     ggplot() + 

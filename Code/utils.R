@@ -136,7 +136,7 @@ DGP2 <- function(x, q, beta, b = 1, numXArgs = 5) {
 
 
 ## Pull data into code with
-modelSp <- function(functionName, n, ...) {
+modelSp <- function(functionName, n, sd = 0.02, ...) {
   # get the function name from input and determine the x1, x2,,, dimension on its own
   # and creates x by runif within function, and passes to determinstic function
   # returns input x, y as matrix and num of x needed for the specified function 
@@ -150,7 +150,8 @@ modelSp <- function(functionName, n, ...) {
   
   x <- matrix(x, ncol = n) # num_x_args x n matrix
   fx <- rlang::call2(functionName, x, ...)  %>% 
-    eval()
+    eval
+  fx <- fx + rnorm(n, mean = 0, sd = sd)
   return(list(x=x, fx=fx, xargs=xargs))
 }
 
