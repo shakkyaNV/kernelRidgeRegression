@@ -1,19 +1,11 @@
----
-title: "KRR in Multiple Dimensions"
-author: "Shakkya Ranasinghe"
-date: "2023-09-24"
-output: html_document
----
-
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+## ----setup, include=FALSE-----------------------
+# knitr::opts_chunk$set(echo = TRUE)
 
 rm(list = ls())
-require(tidyverse)
-require(here)
+# require(tidyverse)
+library(here)
 
-i_am(here("Code", "multiD.Rmd"))
+i_am("Code/multiD.Rmd")
 source(here("Code", "utils.R"))
 config <- config::get()
 
@@ -27,11 +19,9 @@ evalHere <- function(x) {  # since we're going to be using this heavily. A wrapp
   if(!is.character(x)) stop("x should be a string")
   return(base::eval(base::parse(text=x)))
 }
-```
 
-# Specify Model
 
-```{r model}
+## ----model--------------------------------------
 set.seed(seed)
 
 n = n
@@ -48,14 +38,13 @@ for (i in 1:xDim) { # assign each row to x1, x2 ...>
   assign(f("x{i}"), x[i, ] |> unlist())
 }
 
-```
-
-```{r}
-plot(x1, fx)
-```
 
 
-```{r kernelBuilder}
+## -----------------------------------------------
+# plot(x1, fx)
+
+
+## ----kernelBuilder------------------------------
 
 bernoulliKernel <- bernoulliKernel
 lambda = 1e-5 # we will give a constant for now. Later we'll optimize
@@ -70,9 +59,9 @@ for (i in 1:xDim) { # R = list(R1, R2)
 }
 
 print(names(Rkernel))
-```
 
-```{r kernel and R}
+
+## ----kernel and R-------------------------------
 mprod <- function(kernel, xdim, name, I) {
   R <- matrix(rep(1, n*n), nrow = n)
   for (i in 1:xdim) {
@@ -82,69 +71,56 @@ mprod <- function(kernel, xdim, name, I) {
 }
 
 R = mprod(kernel = Rkernel, xdim = xDim, name = "Rkernel", I = I)
-```
 
 
-```{r fHat}
+## ----fHat---------------------------------------
 coef <- (R + n*lambda*I) |> GInv()
 coef <- coef %*% matrix(fx)
 
 phi <- R
 
 fHat <- {t(phi) %*% coef } |> c()
-```
 
 
-
-```{r metrics}
+## ----metrics------------------------------------
 fHat_rmse = Metrics::rmse(fHat, fx)
 print(f("Calculated RMSE: {round(fHat_rmse, 2)}"))
 
 # write the metrics to a file
 valsList = list(n = n, sd = sd, seed = seed, rmse = fHat_rmse)
-file_name = format(Sys.time(), "%h_%m_%b_%d_%Y") |> as.character()
+file_name = format(Sys.time(), "%b_%d_%Y") |> as.character()
 readr::write_csv(as.data.frame(valsList), file = here("Data", "multiDimension_{file_name}.csv"), append = TRUE, col_names = TRUE)
 
-print(f("File saved as: multiDimension_{file_name}.csv in path {config$path_to_data}"))
-```
-
-```{r visualizex1}
-require(dplyr)
-require(ggplot2)
-
-x <- x1
-dfOri <- tibble(x, fx)
-dfFit <- tibble(x, fHat)
-dfOri %>% 
-  left_join(dfFit, by='x') %>%  # get the corresponding fitted value to x
-  reshape2::melt(id='x') %>% # flatten the table so that we can plot as one variable but two groups
-  ggplot() + 
-  geom_point(aes(x=x, y=value, col=variable)) + 
-  labs(title = "(x1,fx) and (x1, FHat)")
-```
+print(f("File saved: {config$path_to_data}{.Platform$file.sep}multiDimension_{file_name}.csv"))
 
 
+## ----visualizex1--------------------------------
+# require(dplyr)
+# require(ggplot2)
+# 
+# x <- x1
+# dfOri <- tibble(x, fx)
+# dfFit <- tibble(x, fHat)
+# dfOri %>% 
+#   left_join(dfFit, by='x') %>%  # get the corresponding fitted value to x
+#   reshape2::melt(id='x') %>% # flatten the table so that we can plot as one variable but two groups
+#   ggplot() + 
+#   geom_point(aes(x=x, y=value, col=variable)) + 
+#   labs(title = "(x1,fx) and (x1, FHat)")
+# 
+# 
+# ## ----visualizex2--------------------------------
+# x <- x2
+# dfOri <- tibble(x, fx)
+# dfFit <- tibble(x, fHat)
+# dfOri %>% 
+#   left_join(dfFit, by='x') %>%  # get the corresponding fitted value to x
+#   reshape2::melt(id='x') %>% # flatten the table so that we can plot as one variable but two groups
+#   ggplot() + 
+#   geom_point(aes(x=x, y=value, col=variable)) + 
+#   labs(title = "(x2, fx) and (x2, FHat)")
+# 
 
-```{r visualizex2}
-x <- x2
-dfOri <- tibble(x, fx)
-dfFit <- tibble(x, fHat)
-dfOri %>% 
-  left_join(dfFit, by='x') %>%  # get the corresponding fitted value to x
-  reshape2::melt(id='x') %>% # flatten the table so that we can plot as one variable but two groups
-  ggplot() + 
-  geom_point(aes(x=x, y=value, col=variable)) + 
-  labs(title = "(x2, fx) and (x2, FHat)")
-```
-
-
-```{r}
+## -----------------------------------------------
 print("done with this")
-```
-
-
-
-
-
-
 
