@@ -1,4 +1,4 @@
 default:
-  PATH_TO_DATA: "/home/sranasin/Data"
-  PATH_TO_LOGS: "/home/sranasin/Logs"
-  PATH_TO_CODE: "/home/sranasin/Code"
+  path_to_data: "/home/sranasin/Data"
+  path_to_logs: "/home/sranasin/Logs"
+  path_to_code: "/home/sranasin/Code"
