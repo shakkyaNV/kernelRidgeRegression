@@ -4,11 +4,11 @@ require(tibble)
 require(tidyr)
 require(dplyr)
 
+
 gcvMain <- function(x, fx) {
   
   ## ----parameters-------------------------------------------------------------
   n = length(fx)
-  x = unlist(x)
   
   ## ----kernel----------------------------------------------------------------
   kernel <- bernoulliKernel
@@ -16,19 +16,25 @@ gcvMain <- function(x, fx) {
   logLambda <- seq(-10, 10, length = 50)
   listLambda <- exp(logLambda)
   
-  
   ## --------------------------------------------------------------------------
   fitValues <- function(x, fx, lambda, kernel) {
     I = diag(1, nrow = length(fx))
+    xDim = min(dim(x))
+    Rkernel = c()
     
-    
-    for (i in 1:min(dim(x))) {
-      xi = evalHere(f("x{i}"))
-      log_info(f("Calculating outer Rkernerl for <x{i}, x{i}>"))
-      assign(f("Rkernel{i}"), outer(xi, xi, bernoulliKernel))
-      Rkernel[f("Rkernel{i}")] = evalHere(f("Rkernel{i}")) %>% list()
+    for (i in 1:xDim) { # assign each row to x1, x2 ...>
+      assign(f("x{i}"), x[i, ] %>% unlist())
     }
-    R = mprod(kernel = Rkernel, xdim = min(dim(x)), name = "Rkernel", I = I)
+    
+    for (j in 1:xDim) {
+      xj = evalHere(f("x{j}"))
+      log_info(f("Calculating outer Rkernerl for <x{j}, x{j}>"))
+      # assign(f("Rkernel{j}"), outer(xj, xj, bernoulliKernel))
+      # print(f("Rkernel{j}"))
+      # Rkernel[f("Rkernel{j}")] = evalHere(f("Rkernel{j}")) %>% list() ## problem
+      Rkernel[f("Rkernel{j}")] = outer(xj, xj, bernoulliKernel)
+    }
+    R = mprod(kernel = Rkernel, xdim = xDim, name = "Rkernel", I = I)
     
     coef <- (R + n*lambda*I) %>% GInv()
     coef <- coef %*% matrix(fx)

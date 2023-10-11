@@ -20,14 +20,15 @@ source(here("Code", "utils.R"))
 source(here("Code", "gcv.R"))
 config <- config::get()
 
-date_time = format(Sys.time(), "%H_%M_%b_%d_%Y")
-file_name = f("{jobname}_{jobid}_{date_time}")
-log_appender(appender_file(here("Logs", f("{file_name}.log"))))
-
 evalHere <- function(x) {  # since we're going to be using this heavily. A wrapper
+  # This function force evaluate the glued content
   if(!is.character(x)) stop("x should be a string")
   return(base::eval(base::parse(text=x)))
 }
+
+date_time = format(Sys.time(), "%H_%M_%b_%d_%Y")
+file_name = f("{jobname}_{jobid}_{date_time}")
+log_appender(appender_file(here("Logs", f("{file_name}.log"))))
 
 
 ## ----model--------------------------------------
@@ -66,7 +67,7 @@ I = diag(1, nrow = n)
 Rkernel = c()
 
 for (i in 1:xDim) { # R = list(R1, R2)
-  xi = evalHere(f("x{i}"))
+  xi = evalHere(f("x{i}")) 
   log_info(f("Calculating outer Rkernerl for <x{i}, x{i}>"))
   assign(f("Rkernel{i}"), outer(xi, xi, bernoulliKernel))
   Rkernel[f("Rkernel{i}")] = evalHere(f("Rkernel{i}")) %>% list()
