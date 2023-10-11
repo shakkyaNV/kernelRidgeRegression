@@ -4,21 +4,12 @@ require(tibble)
 require(tidyr)
 require(dplyr)
 
-gcvMain <- function(n, model, sd, ...) {
+gcvMain <- function(n, x, fx) {
   
-  ## ----model-----------------------------------------------------------------
-  n = n
-  functionName = model
-  
-  modelvals = modelSp(functionName, n, sd, ...)
-  x = modelvals$x
-  
-  for (i in 1:modelvals$xargs) {
-    assign(paste0("x", i), x[i, ]  %>% unlist())
-  }
-  
-  x = x1
-  y = modelvals$fx
+  ## ----parameters-------------------------------------------------------------
+  # n = n
+  # x = x
+  # fx = fx
   
   ## ----kernel----------------------------------------------------------------
   kernel <- bernoulliKernel
@@ -28,12 +19,12 @@ gcvMain <- function(n, model, sd, ...) {
   
   
   ## --------------------------------------------------------------------------
-  fitValues <- function(x, y, lambda, kernel) {
-    I = diag(1, nrow = length(y))
+  fitValues <- function(x, fx, lambda, kernel) {
+    I = diag(1, nrow = length(fx))
     R = outer(x, x, FUN = kernel)
     
     coef <- (R + n*lambda*I) %>% GInv()
-    coef <- coef %*% matrix(y)
+    coef <- coef %*% matrix(fx)
     
     phi <- R
     fHat <- (t(phi) %*% coef) %>% c()
@@ -41,14 +32,14 @@ gcvMain <- function(n, model, sd, ...) {
     return(list(fHat, S))
   }
   
-  df = tibble(y=y)
+  df = tibble(fx=fx)
   sf = tibble(lambda = purrr::map_chr(listLambda, f))
   
   for (i in 1:length(listLambda)) {
     lambda = listLambda[i]
     # assign("name", f("{round(lambda, 5)}"))
     # varName = f("fHat_{i}")
-    valuesReturn = fitValues(x,y,lambda, kernel)
+    valuesReturn = fitValues(x,fx,lambda, kernel)
     valuesReturn[1][[1]] -> vals
     valuesReturn[2][[1]] -> s
     df[, i+1] <- vals
@@ -61,7 +52,7 @@ gcvMain <- function(n, model, sd, ...) {
   gcv = vector()
   df %>% 
     mutate(
-      across(fHat1:fHat50, ~ sum((y-.x)^2)
+      across(fHat1:fHat50, ~ sum((fx-.x)^2)
       )
     ) %>% 
     select(-x) %>% 
