@@ -17,6 +17,7 @@ library(here)
 library(logger, quietly = TRUE)
 
 source(here("Code", "utils.R"))
+source(here("Code", "gcv.R"))
 config <- config::get()
 
 date_time = format(Sys.time(), "%H_%M_%b_%d_%Y")
@@ -58,7 +59,7 @@ for (i in 1:xDim) { # assign each row to x1, x2 ...>
 ## ----kernelBuilder------------------------------
 
 bernoulliKernel <- bernoulliKernel
-lambda = 1e-5 # we will give a constant for now. Later we'll optimize
+lambda = gcvMain(n = n, model = functionName, sd = sd) # optimized according to GCV function
 I = diag(1, nrow = n)
 Rkernel = c()
 
