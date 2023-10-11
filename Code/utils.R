@@ -1,6 +1,6 @@
 ## Util Functions for other codes
-require(magrittr, quietly = FALSE)
-require(rlang, quietly = FALSE)
+require(magrittr, quietly = TRUE)
+require(rlang, quietly = TRUE)
 
 ## Utils
 GInv <- MASS::ginv
@@ -136,7 +136,7 @@ DGP2 <- function(x, q, beta, b = 1, numXArgs = 5) {
 
 
 ## Pull data into code with
-modelSp <- function(functionName, n, sd = 0.02, ...) {
+modelSp <- function(functionName, n, ...) {
   # get the function name from input and determine the x1, x2,,, dimension on its own
   # and creates x by runif within function, and passes to determinstic function
   # returns input x, y as matrix and num of x needed for the specified function 
@@ -151,7 +151,7 @@ modelSp <- function(functionName, n, sd = 0.02, ...) {
   x <- matrix(x, ncol = n) # num_x_args x n matrix
   fx <- rlang::call2(functionName, x, ...)  %>% 
     eval
-  fx <- fx + rnorm(n, mean = 0, sd = sd)
+  fx <- fx
   return(list(x=x, fx=fx, xargs=xargs))
 }
 

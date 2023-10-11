@@ -44,6 +44,7 @@ modelVals = modelSp(functionName, n = n, sd = sd) # from utils # x returning as 
 xargs = modelVals$xargs
 x = modelVals$x
 fx = modelVals$fx
+y = fx + rnorm(n, mean = 0, sd = sd)
 
 xDim = min(dim(x))
 for (i in 1:xDim) { # assign each row to x1, x2 ...>
@@ -53,13 +54,13 @@ for (i in 1:xDim) { # assign each row to x1, x2 ...>
 
 
 ## -----------------------------------------------
-# plot(x1, fx)
+# plot(x1, y)
 
 
 ## ----kernelBuilder------------------------------
 
 bernoulliKernel <- bernoulliKernel
-lambda = gcvMain(n = n, model = functionName, sd = sd) # optimized according to GCV function
+lambda = gcvMain(n = n, x = x, fx = fx) # optimized according to GCV function
 log_info("Best fit is given with lambda value: {round(lambda, 3)}")
 I = diag(1, nrow = n)
 Rkernel = c()
@@ -85,7 +86,7 @@ R = mprod(kernel = Rkernel, xdim = xDim, name = "Rkernel", I = I)
 
 ## ----fHat---------------------------------------
 coef <- (R + n*lambda*I) %>% GInv()
-coef <- coef %*% matrix(fx)
+coef <- coef %*% matrix(y)
 
 phi <- R
 
@@ -93,7 +94,7 @@ fHat <- {t(phi) %*% coef } %>% c()
 
 
 ## ----metrics------------------------------------
-fHat_rmse = Metrics::rmse(fHat, fx)
+fHat_rmse = Metrics::rmse(fHat, y)
 log_info(f("Calculated RMSE: {round(fHat_rmse, 2)}"))
 
 # write the metrics to a file
@@ -108,26 +109,26 @@ log_info(f("File has colnames: {names(valsList)}") %>% logger::skip_formatter())
 # require(ggplot2)
 # 
 # x <- x1
-# dfOri <- tibble(x, fx)
+# dfOri <- tibble(x, y)
 # dfFit <- tibble(x, fHat)
 # dfOri %>% 
 #   left_join(dfFit, by='x') %>%  # get the corresponding fitted value to x
 #   reshape2::melt(id='x') %>% # flatten the table so that we can plot as one variable but two groups
 #   ggplot() + 
 #   geom_point(aes(x=x, y=value, col=variable)) + 
-#   labs(title = "(x1,fx) and (x1, FHat)")
+#   labs(title = "(x1,y) and (x1, FHat)")
 # 
 # 
 # ## ----visualizex2--------------------------------
 # x <- x2
-# dfOri <- tibble(x, fx)
+# dfOri <- tibble(x, y)
 # dfFit <- tibble(x, fHat)
 # dfOri %>% 
 #   left_join(dfFit, by='x') %>%  # get the corresponding fitted value to x
 #   reshape2::melt(id='x') %>% # flatten the table so that we can plot as one variable but two groups
 #   ggplot() + 
 #   geom_point(aes(x=x, y=value, col=variable)) + 
-#   labs(title = "(x2, fx) and (x2, FHat)")
+#   labs(title = "(x2, y) and (x2, FHat)")
 # 
 
 ## -----------------------------------------------
