@@ -4,12 +4,10 @@ require(tibble)
 require(tidyr)
 require(dplyr)
 
-gcvMain <- function(n, x, fx) {
+gcvMain <- function(x, fx) {
   
   ## ----parameters-------------------------------------------------------------
-  # n = n
-  # x = x
-  # fx = fx
+  n = length(fx)
   
   ## ----kernel----------------------------------------------------------------
   kernel <- bernoulliKernel

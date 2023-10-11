@@ -6,11 +6,12 @@ rm(list = ls())
 
 args <- commandArgs(TRUE)
 parameters <- as.numeric(args[1:4])
+parameters <- c(100, 0.02, 100, 000) %>% as.numeric()
 n = parameters[1]
 sd = parameters[2]
 seed = parameters[3]
 jobid = parameters[4]
-jobname = args[5]
+jobname = "test" #args[5]
 
 here::i_am("Code/multiD.R")
 library(here)
@@ -40,7 +41,7 @@ set.seed(seed)
 n = n
 functionName <- "DGP1"
 
-modelVals = modelSp(functionName, n = n, sd = sd) # from utils # x returning as matrix, fx as list
+modelVals = modelSp(functionName, n = n) # from utils # x returning as matrix, fx as list
 xargs = modelVals$xargs
 x = modelVals$x
 fx = modelVals$fx
@@ -60,7 +61,7 @@ for (i in 1:xDim) { # assign each row to x1, x2 ...>
 ## ----kernelBuilder------------------------------
 
 bernoulliKernel <- bernoulliKernel
-lambda = gcvMain(n = n, x = x, fx = fx) # optimized according to GCV function
+lambda = gcvMain(x = x, fx = fx) # optimized according to GCV function
 log_info("Best fit is given with lambda value: {round(lambda, 3)}")
 I = diag(1, nrow = n)
 Rkernel = c()
