@@ -155,7 +155,13 @@ modelSp <- function(functionName, n, ...) {
   return(list(x=x, fx=fx, xargs=xargs))
 }
 
-
+mprod <- function(kernel, xdim, name, I) {
+  R <- matrix(rep(1, n*n), nrow = n)
+  for (i in 1:xdim) {
+    R = R * getElement(kernel, f("{name}{i}"))
+  }
+  return(R)
+}
 
 
 

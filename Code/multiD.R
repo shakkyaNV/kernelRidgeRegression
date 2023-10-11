@@ -73,13 +73,6 @@ for (i in 1:xDim) { # R = list(R1, R2)
 }
 
 ## ----kernel and R-------------------------------
-mprod <- function(kernel, xdim, name, I) {
-  R <- matrix(rep(1, n*n), nrow = n)
-  for (i in 1:xdim) {
-    R = R * getElement(kernel, f("{name}{i}"))
-  }
-  return(R)
-}
 
 R = mprod(kernel = Rkernel, xdim = xDim, name = "Rkernel", I = I)
 

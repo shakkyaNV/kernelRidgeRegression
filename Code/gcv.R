@@ -20,7 +20,15 @@ gcvMain <- function(x, fx) {
   ## --------------------------------------------------------------------------
   fitValues <- function(x, fx, lambda, kernel) {
     I = diag(1, nrow = length(fx))
-    R = outer(x, x, FUN = kernel)
+    
+    
+    for (i in 1:min(dim(x))) {
+      xi = evalHere(f("x{i}"))
+      log_info(f("Calculating outer Rkernerl for <x{i}, x{i}>"))
+      assign(f("Rkernel{i}"), outer(xi, xi, bernoulliKernel))
+      Rkernel[f("Rkernel{i}")] = evalHere(f("Rkernel{i}")) %>% list()
+    }
+    R = mprod(kernel = Rkernel, xdim = min(dim(x)), name = "Rkernel", I = I)
     
     coef <- (R + n*lambda*I) %>% GInv()
     coef <- coef %*% matrix(fx)
