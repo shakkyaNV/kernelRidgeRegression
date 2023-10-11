@@ -28,7 +28,7 @@ gcvMain <- function(x, fx) {
     
     for (j in 1:xDim) {
       xj = evalHere(f("x{j}"))
-      log_info(f("Calculating outer Rkernerl for <x{j}, x{j}>"))
+      # log_info(f("Calculating outer Rkernerl for <x{j}, x{j}>"))
       # assign(f("Rkernel{j}"), outer(xj, xj, bernoulliKernel))
       # print(f("Rkernel{j}"))
       # Rkernel[f("Rkernel{j}")] = evalHere(f("Rkernel{j}")) %>% list() ## problem
