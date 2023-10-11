@@ -1,5 +1,8 @@
+require(here)
 source(here("Code", "utils.R"))
-
+require(tibble)
+require(tidyr)
+require(logger)
 
 gcvMain <- function(n, model, sd, ...) {
   
@@ -91,3 +94,4 @@ gcvMain <- function(n, model, sd, ...) {
   return(minlambdaGCV)
 }
 
+gcvMain(n = 100, model = "SIN", sd = 0.01, power = 7)
