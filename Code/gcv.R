@@ -3,7 +3,6 @@ source(here("Code", "utils.R"))
 require(tibble)
 require(tidyr)
 require(dplyr)
-require(logger)
 
 gcvMain <- function(n, model, sd, ...) {
   
@@ -48,7 +47,6 @@ gcvMain <- function(n, model, sd, ...) {
   for (i in 1:length(listLambda)) {
     lambda = listLambda[i]
     # assign("name", f("{round(lambda, 5)}"))
-    # f("Calculating fitted value for lambda: {lambda}") %>% log_info()
     # varName = f("fHat_{i}")
     valuesReturn = fitValues(x,y,lambda, kernel)
     valuesReturn[1][[1]] -> vals
@@ -88,11 +86,5 @@ gcvMain <- function(n, model, sd, ...) {
   
   ## --------------------------------------------------------------------------
   minlambdaGCV <- minGCV[{which.min(minGCV$gcv)}, 2] %>% pull()
-  
-  f("Best Fit is given with lambda value: {minlambdaGCV}") %>% 
-    log_info()
-  
   return(minlambdaGCV)
 }
-
-gcvMain(n = 100, model = "SIN", sd = 0.01, power = 7)
