@@ -8,6 +8,7 @@ gcvMain <- function(x, fx) {
   
   ## ----parameters-------------------------------------------------------------
   n = length(fx)
+  x = unlist(x)
   
   ## ----kernel----------------------------------------------------------------
   kernel <- bernoulliKernel
