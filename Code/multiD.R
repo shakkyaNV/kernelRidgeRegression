@@ -6,12 +6,11 @@ rm(list = ls())
 
 args <- commandArgs(TRUE)
 parameters <- as.numeric(args[1:4])
-parameters <- c(100, 0.02, 100, 000) %>% as.numeric()
 n = parameters[1]
 sd = parameters[2]
 seed = parameters[3]
 jobid = parameters[4]
-jobname = "test" #args[5]
+jobname = args[5]
 
 here::i_am("Code/multiD.R")
 library(here)
