@@ -60,6 +60,7 @@ for (i in 1:xDim) { # assign each row to x1, x2 ...>
 
 bernoulliKernel <- bernoulliKernel
 lambda = gcvMain(n = n, model = functionName, sd = sd) # optimized according to GCV function
+log_info("Best fit is given with lambda value: {round(lambda, 3)}")
 I = diag(1, nrow = n)
 Rkernel = c()
 
