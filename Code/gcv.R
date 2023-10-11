@@ -1,7 +1,7 @@
 source(here("Code", "utils.R"))
 
 
-main <- function(n, model, sd, ...) {
+gcvMain <- function(n, model, sd, ...) {
   
   ## ----model-----------------------------------------------------------------
   n = n
