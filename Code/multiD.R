@@ -15,7 +15,7 @@ jobname = args[5]
 here::i_am("Code/multiD.R")
 library(here)
 library(logger, quietly = TRUE)
-
+print(here())
 source(here("Code", "utils.R"))
 source(here("Code", "gcv.R"))
 config <- config::get()
@@ -60,7 +60,7 @@ for (i in 1:xDim) { # assign each row to x1, x2 ...>
 ## ----kernelBuilder------------------------------
 
 bernoulliKernel <- bernoulliKernel
-lambda = gcvMain(x = x, fx = fx) # optimized according to GCV function
+lambda = 4e-5 #gcvMain(x = x, fx = fx) # optimized according to GCV function
 log_info("Best fit is given with lambda value: {round(lambda, 3)}")
 I = diag(1, nrow = n)
 Rkernel = c()
