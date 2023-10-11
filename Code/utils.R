@@ -1,6 +1,6 @@
 ## Util Functions for other codes
-require(magrittr)
-require(rlang)
+require(magrittr, quietly = FALSE)
+require(rlang, quietly = FALSE)
 
 ## Utils
 GInv <- MASS::ginv
