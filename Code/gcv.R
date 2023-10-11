@@ -2,7 +2,6 @@ require(here)
 source(here("Code", "utils.R"))
 require(tibble)
 require(tidyr)
-require(dplyr)
 require(logger)
 
 gcvMain <- function(n, model, sd, ...) {
