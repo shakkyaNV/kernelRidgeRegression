@@ -33,8 +33,8 @@ log_appender(appender_file(here("Logs", f("{file_name}.log"))))
 
 ## ----model--------------------------------------
 log_info("-----------------------------------------------------")
-log_info(f("Process Starting: multiDimensional Kernel Regression Metrics Evaluation"))
-log_info(f("Parameters Received: {parameters}") %>% skip_formatter())
+# log_info(f("Process Starting: multiDimensional Kernel Regression Metrics Evaluation"))
+# log_info(f("Parameters Received: {parameters}") %>% skip_formatter())
 
 set.seed(seed)
 
