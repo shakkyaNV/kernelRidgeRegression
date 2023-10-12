@@ -4,12 +4,12 @@
 rm(list = ls())
 # n=100;sd=0.01;seed=12;jobid=010;jobname="testAll"
 args <- commandArgs(TRUE)
-parameters <- as.numeric(args[1:5])
+parameters <- as.numeric(args[1:4])
 n = parameters[1]
 sd = parameters[2]
 seed = parameters[3]
 jobid = parameters[4]
-runTimeName = parameters[5]
+runTimeName = args[5]
 jobname = args[6]
 
 here::i_am("Code/multiD.R")
@@ -87,7 +87,7 @@ log_info(f("Calculated RMSE: {round(fHat_rmse, 2)}"))
 
 # write the metrics to a file
 valsList = list(n = n, sd = sd, seed = seed, rmse = fHat_rmse)
-readr::write_csv(as.data.frame(valsList), file = here("Data", f("{file_name}.csv")), append = TRUE, col_names = FALSE)
+readr::write_csv(as.data.frame(valsList), file = here("Data", f("{runTimeName}.csv")), append = TRUE, col_names = FALSE)
 
 log_info(f("File saved: {as.character(here('Data'))}{.Platform$file.sep}{file_name}.csv"))
 log_info(f("File has colnames: {names(valsList)}") %>% logger::skip_formatter())
