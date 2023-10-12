@@ -33,7 +33,7 @@ log_info(f("Parameters Received: {parameters}") %>% skip_formatter())
 set.seed(seed)
 
 n = n
-functionName <- "DGP1"
+functionName <- "DGP2"
 
 modelVals = modelSp(functionName, n = n) # from utils # x returning as matrix, fx as list
 xargs = modelVals$xargs
@@ -86,10 +86,10 @@ if (functionName == "DGP1") {
   Rtil4 = 1 - Rkernel$Rkernel4
   Rtil5 = 1 - Rkernel$Rkernel5
   
-  R <- 1 + Rtil1 + Rtil2 + Rtil3 + Rtil4 + Rtil5 + 
-    Rtil1*Rtil2 + Rtil1*Rtil3 +  Rtil1*Rtil4 +  Rtil1*Rtil5 +   
-    Rtil2*Rtil3 + Rtil2*Rtil4 +  Rtil2*Rtil5 +  
-    Rtil3*Rtil4 + Rtil3*Rtil5  
+  R <- 1 + Rtil1 + Rtil2 + Rtil3 + Rtil4 + Rtil5 +  
+     Rtil1*Rtil2 + Rtil1*Rtil3 +  Rtil1*Rtil4 +  Rtil1*Rtil5 +   
+     Rtil2*Rtil3 + Rtil2*Rtil4 +  Rtil2*Rtil5 +  
+     Rtil3*Rtil4 + Rtil3*Rtil5  
 }
 
 # R = mprod(kernel = Rkernel, xdim = xDim, name = "Rkernel", I = I)
