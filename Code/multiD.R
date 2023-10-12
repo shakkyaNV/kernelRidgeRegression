@@ -2,7 +2,7 @@
 # knitr::opts_chunk$set(echo = TRUE)
 
 rm(list = ls())
-# n=100;sd=0.01;seed=12;jobid=010;jobname="testAll"
+# n=100;sd=0.01;seed=12;jobid=010;jobname="testAll";runTimeName="rep1"
 args <- commandArgs(TRUE)
 parameters <- as.numeric(args[1:4])
 n = parameters[1]
@@ -33,7 +33,7 @@ log_info(f("Parameters Received: {parameters}") %>% skip_formatter())
 set.seed(seed)
 
 n = n
-functionName <- "DGP2"
+functionName <- "DGP1"
 
 modelVals = modelSp(functionName, n = n) # from utils # x returning as matrix, fx as list
 xargs = modelVals$xargs
@@ -61,6 +61,7 @@ I = diag(1, nrow = n)
 Rkernel = c()
 
 for (i in 1:xDim) { # R = list(R1, R2)
+  
   xi = evalHere(f("x{i}")) 
   log_info(f("Calculating outer Rkernerl for <x{i}, x{i}>"))
   assign(f("Rkernel{i}"), outer(xi, xi, bernoulliKernel))
@@ -68,8 +69,18 @@ for (i in 1:xDim) { # R = list(R1, R2)
 }
 
 ## ----kernel and R-------------------------------
+RwoInteractions <- function(Rkernel, xargs) {
+  maxIntOrder = as.numeric(xargs)
+  
+  
+}
 
-R = mprod(kernel = Rkernel, xdim = xDim, name = "Rkernel", I = I)
+Rtil1 = 1 - Rkernel$Rkernel1
+Rtil2 = 1 - Rkernel$Rkernel2
+
+R <- 1 + Rtil1 + Rtil2 
+
+# R = mprod(kernel = Rkernel, xdim = xDim, name = "Rkernel", I = I)
 
 
 ## ----fHat---------------------------------------
