@@ -1,8 +1,8 @@
-require(here)
+require(here, quietly = TRUE)
 source(here("Code", "utils.R"))
-require(tibble)
-require(tidyr)
-require(dplyr)
+require(tibble, quietly = TRUE)
+require(tidyr, quietly = TRUE)
+require(dplyr, quietly = TRUE)
 
 
 gcvMain <- function(x, fx) {

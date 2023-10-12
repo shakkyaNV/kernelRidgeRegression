@@ -13,18 +13,12 @@ jobid = parameters[4]
 jobname = args[5]
 
 here::i_am("Code/multiD.R")
-library(here)
+library(here, quietly = TRUE)
 library(logger, quietly = TRUE)
 print(here())
 source(here("Code", "utils.R"))
 source(here("Code", "gcv.R"))
 config <- config::get()
-
-evalHere <- function(x) {  # since we're going to be using this heavily. A wrapper
-  # This function force evaluate the glued content
-  if(!is.character(x)) stop("x should be a string")
-  return(base::eval(base::parse(text=x)))
-}
 
 date_time = format(Sys.time(), "%H_%M_%b_%d_%Y")
 file_name = f("{jobname}_{jobid}_{date_time}")

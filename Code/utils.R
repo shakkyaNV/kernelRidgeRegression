@@ -164,7 +164,11 @@ mprod <- function(kernel, xdim, name, I) {
 }
 
 
-
+evalHere <- function(x) {  # since we're going to be using this heavily. A wrapper
+  # This function force evaluate the glued content
+  if(!is.character(x)) stop("x should be a string")
+  return(base::eval(base::parse(text=x)))
+}
 
 
 
