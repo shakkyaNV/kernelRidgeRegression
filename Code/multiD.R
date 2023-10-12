@@ -33,7 +33,7 @@ log_info(f("Parameters Received: {parameters}") %>% skip_formatter())
 set.seed(seed)
 
 n = n
-functionName <- "DGP1"
+functionName <- "DGP2"
 
 modelVals = modelSp(functionName, n = n) # from utils # x returning as matrix, fx as list
 xargs = modelVals$xargs
