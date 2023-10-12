@@ -4,12 +4,13 @@
 rm(list = ls())
 # n=100;sd=0.01;seed=12;jobid=010;jobname="testAll"
 args <- commandArgs(TRUE)
-parameters <- as.numeric(args[1:4])
+parameters <- as.numeric(args[1:5])
 n = parameters[1]
 sd = parameters[2]
 seed = parameters[3]
 jobid = parameters[4]
-jobname = args[5]
+runTimeName = parameters[5]
+jobname = args[6]
 
 here::i_am("Code/multiD.R")
 library(here, quietly = TRUE)
@@ -19,7 +20,8 @@ source(here("Code", "gcv.R"))
 config <- config::get()
 
 date_time = format(Sys.time(), "%H_%M_%b_%d_%Y")
-file_name = f("{jobname}_{jobid}_{date_time}")
+# file_name = f("{jobname}_{jobid}_{date_time}")
+file_name = f("{runTimeName}")
 log_appender(appender_tee(here("Logs", f("{file_name}.log"))))
 
 
@@ -84,7 +86,6 @@ fHat_rmse = Metrics::rmse(fHat, y)
 log_info(f("Calculated RMSE: {round(fHat_rmse, 2)}"))
 
 # write the metrics to a file
-file_name = f("data{jobname}")
 valsList = list(n = n, sd = sd, seed = seed, rmse = fHat_rmse)
 readr::write_csv(as.data.frame(valsList), file = here("Data", f("{file_name}.csv")), append = TRUE, col_names = FALSE)
 
