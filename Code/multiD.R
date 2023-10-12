@@ -74,11 +74,20 @@ RwoInteractions <- function(Rkernel, xargs) {
   
   
 }
-
-Rtil1 = 1 - Rkernel$Rkernel1
-Rtil2 = 1 - Rkernel$Rkernel2
-
-R <- 1 + Rtil1 + Rtil2 
+if (functionName == "DGP1") {
+  Rtil1 = 1 - Rkernel$Rkernel1
+  Rtil2 = 1 - Rkernel$Rkernel2
+  
+  R <- 1 + Rtil1 + Rtil2 
+} else if (functionName == "DGP2") {
+  Rtil1 = 1 - Rkernel$Rkernel1
+  Rtil2 = 1 - Rkernel$Rkernel2
+  Rtil3 = 1 - Rkernel$Rkernel3
+  Rtil4 = 1 - Rkernel$Rkernel4
+  Rtil5 = 1 - Rkernel$Rkernel5
+  
+  R <- 1 + Rtil1 + Rtil2 + Rtil3 + Rtil4 + Rtil5
+}
 
 # R = mprod(kernel = Rkernel, xdim = xDim, name = "Rkernel", I = I)
 
