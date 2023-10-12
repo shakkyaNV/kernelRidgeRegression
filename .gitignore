@@ -40,3 +40,4 @@ R/
 Logs/
 Data/
 kernelRidgeRegression.Rproj
+*.out # specifically to ignore nohup.out
