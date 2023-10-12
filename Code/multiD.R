@@ -86,6 +86,7 @@ fHat_rmse = Metrics::rmse(fHat, y)
 log_info(f("Calculated RMSE: {round(fHat_rmse, 2)}"))
 
 # write the metrics to a file
+file_name = f("data{jobname}")
 valsList = list(n = n, sd = sd, seed = seed, rmse = fHat_rmse)
 readr::write_csv(as.data.frame(valsList), file = here("Data", f("{file_name}.csv")), append = TRUE, col_names = FALSE)
 
