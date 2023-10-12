@@ -65,7 +65,7 @@ fitValues <- function(x, fx, lambda, kernel) {
   }
   listName = "RKL"
   for (j in 1:xDim) {
-      xNj = evalHere(f("xN{j}"))
+      xNj = base::eval(base::parse(text = f("xN{j}")))
       # log_info(f("Calculating outer Rkernerl for <x{j}, x{j}>"))
       # assign(f("Rkernel{j}"), outer(xj, xj, bernoulliKernel))
       # print(f("Rkernel{j}"))
@@ -73,7 +73,7 @@ fitValues <- function(x, fx, lambda, kernel) {
       Rkernel[[f("{listName}{j}")]] = outer(xNj, xNj, bernoulliKernel)
   }
   
-  R = mprod(kernel = Rkernel, xdim = xDim, name = f("{RKL}"), I = I)
+  R = mprod(kernel = Rkernel, xdim = xDim, name = listName, I = I)
   
   
   coef <- (R + n*lambda*I) |> GInv()
@@ -130,6 +130,10 @@ for (i in 1:nrow(sf)) {
     )}^2
   } / (n)
 }
+
+tibble(gcv, logLambda) %>% 
+  ggplot(aes(y = gcv, x = logLambda)) +
+  geom_point()
 
 gcv |> as_tibble_col(column_name = "gcv") |> 
   bind_cols(as_tibble_col(listLambda, column_name = "lambdaValue")) |> 
