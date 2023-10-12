@@ -21,20 +21,21 @@ gcvMain <- function(x, fx) {
     I = diag(1, nrow = length(fx))
     xDim = min(dim(x))
     Rkernel = c()
-    
-    for (i in 1:xDim) { # assign each row to x1, x2 ...>
-      assign(f("x{i}"), x[i, ] %>% unlist())
+    for (k in 1:xDim) { # assign each row to x1, x2 ...>
+      assign(f("xN{k}"), x[k, ] %>% unlist())
     }
     
+    listName = "RKL"
     for (j in 1:xDim) {
-      xj = evalHere(f("x{j}"))
+      xNj = base::eval(base::parse(text = f("xN{j}")))
       # log_info(f("Calculating outer Rkernerl for <x{j}, x{j}>"))
       # assign(f("Rkernel{j}"), outer(xj, xj, bernoulliKernel))
       # print(f("Rkernel{j}"))
       # Rkernel[f("Rkernel{j}")] = evalHere(f("Rkernel{j}")) %>% list() ## problem
-      Rkernel[f("Rkernel{j}")] = outer(xj, xj, bernoulliKernel)
+      Rkernel[[f("{listName}{j}")]] = outer(xNj, xNj, bernoulliKernel)
     }
-    R = mprod(kernel = Rkernel, xdim = xDim, name = "Rkernel", I = I)
+    
+    R = mprod(kernel = Rkernel, xdim = xDim, name = listName, I = I)
     
     coef <- (R + n*lambda*I) %>% GInv()
     coef <- coef %*% matrix(fx)

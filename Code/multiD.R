@@ -2,8 +2,7 @@
 # knitr::opts_chunk$set(echo = TRUE)
 
 rm(list = ls())
-# require(tidyverse)
-
+# n=100;sd=0.01;seed=12;jobid=010;jobname="testAll"
 args <- commandArgs(TRUE)
 parameters <- as.numeric(args[1:4])
 n = parameters[1]
@@ -15,20 +14,19 @@ jobname = args[5]
 here::i_am("Code/multiD.R")
 library(here, quietly = TRUE)
 library(logger, quietly = TRUE)
-print(here())
 source(here("Code", "utils.R"))
 source(here("Code", "gcv.R"))
 config <- config::get()
 
 date_time = format(Sys.time(), "%H_%M_%b_%d_%Y")
 file_name = f("{jobname}_{jobid}_{date_time}")
-log_appender(appender_file(here("Logs", f("{file_name}.log"))))
+log_appender(appender_tee(here("Logs", f("{file_name}.log"))))
 
 
 ## ----model--------------------------------------
 log_info("-----------------------------------------------------")
-# log_info(f("Process Starting: multiDimensional Kernel Regression Metrics Evaluation"))
-# log_info(f("Parameters Received: {parameters}") %>% skip_formatter())
+log_info(f("Process Starting: multiDimensional Kernel Regression Metrics Evaluation"))
+log_info(f("Parameters Received: {parameters}") %>% skip_formatter())
 
 set.seed(seed)
 
