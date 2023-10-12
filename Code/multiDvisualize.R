@@ -2,18 +2,27 @@ here::i_am("Code/multiDvisualize.R")
 library(here)
 source(here("Code", "utils.R"))
 library(ggplot2)
+library(dplyr)
 
 ## Execute following in terminal while in Data folder
 ## scp sranasin@quanah.hpcc.ttu.edu:/home/sranasin/kernelRidgeRegression/Data/datamultiD.csv .
 
-file_name = "RealTest1.csv"
+# file_name = "RealTest1.csv"
+file_name = "RealTest2.csv"
 df = readr::read_csv(here("Data", file_name), 
                      col_names = c("n", "sd", "seed", "rmse"))
 df %>% 
   head()
 
+
+# Plot
 df %>%
-  filter(n == 200) %>%
+  filter(n == 100) %>%
   select(rmse) %>%
   ggplot(aes(y = rmse)) +
   geom_boxplot()
+
+# mean of items
+df |> 
+  filter(n == 100) |> 
+  pull(rmse) |> mean()
