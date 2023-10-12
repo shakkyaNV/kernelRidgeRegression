@@ -20,7 +20,8 @@ source(here("Code", "gcv.R"))
 config <- config::get()
 
 date_time = format(Sys.time(), "%H_%M_%b_%d_%Y")
-file_name = f("{jobname}_{jobid}_{date_time}")
+# file_name = f("{jobname}_{jobid}_{date_time}")
+file_name = f("{runTimeName}")
 log_appender(appender_tee(here("Logs", f("{file_name}.log"))))
 
 
@@ -54,7 +55,7 @@ for (i in 1:xDim) { # assign each row to x1, x2 ...>
 ## ----kernelBuilder------------------------------
 
 bernoulliKernel <- bernoulliKernel
-lambda = gcvMain(x = x, fx = fx) # optimized according to GCV function
+lambda = 1e-5 #gcvMain(x = x, fx = fx) # optimized according to GCV function
 log_info("Best fit is given with lambda value: {round(lambda, 3)}")
 I = diag(1, nrow = n)
 Rkernel = c()
