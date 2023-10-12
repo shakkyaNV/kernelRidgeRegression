@@ -24,24 +24,26 @@ source(here("Code/utils.R"))
 
 ```{r model}
 n = 100
-functionName = "SIN"
+functionName = "DGP1"
 
-modelvals = modelSp(functionName, n, power=8)
+modelvals = modelSp(functionName, n =n)
+xargs = modelvals$xargs
 x = modelvals$x
+fx = modelvals$fx
 
 for (i in 1:modelvals$xargs) {
-  assign(paste0("x", i), x[i, ]  %>% unlist())
+  assign(f("x{i}"), x[i, ]  %>% unlist())
 }
 
-x = x1
-y = modelvals$fx
 
-tibble(x, y) |> 
+tibble(x1, fx) |> 
     ggplot() + 
-    geom_point(aes(x=x, y=y), color = "Steelblue4") + 
-    labs(title = "Starting data: x & y") + 
+    geom_point(aes(x=x1, y=fx), color = "Steelblue4") + 
+    labs(title = "Starting data: x & fx") + 
     theme_classic()
 ```
+
+
 ```{r kernel}
 kernel <- bernoulliKernel
 
@@ -50,15 +52,32 @@ listLambda <- exp(logLambda)
 ```
 
 
-Compute fitted value for each lambda iteratively. 
+# Compute fitted value for each lambda iteratively. 
 
 ```{r}
-fitValues <- function(x, y, lambda, kernel) {
-  I = diag(1, nrow = length(y))
-  R = outer(x, x, FUN = kernel)
+fitValues <- function(x, fx, lambda, kernel) {
+  I = diag(1, nrow = length(fx))
+  xDim = min(dim(x))
+  Rkernel = c()
+  
+  for (i in 1:xDim) { # assign each row to x1, x2 ...>
+      assign(f("xN{i}"), x[i, ] %>% unlist())
+  }
+  listName = "RKL"
+  for (j in 1:xDim) {
+      xNj = evalHere(f("xN{j}"))
+      # log_info(f("Calculating outer Rkernerl for <x{j}, x{j}>"))
+      # assign(f("Rkernel{j}"), outer(xj, xj, bernoulliKernel))
+      # print(f("Rkernel{j}"))
+      # Rkernel[f("Rkernel{j}")] = evalHere(f("Rkernel{j}")) %>% list() ## problem
+      Rkernel[[f("{listName}{j}")]] = outer(xNj, xNj, bernoulliKernel)
+  }
+  
+  R = mprod(kernel = Rkernel, xdim = xDim, name = f("{RKL}"), I = I)
+  
   
   coef <- (R + n*lambda*I) |> GInv()
-  coef <- coef %*% matrix(y)
+  coef <- coef %*% matrix(fx)
   
   phi <- R
   fHat <- (t(phi) %*% coef) |> c()
@@ -66,7 +85,7 @@ fitValues <- function(x, y, lambda, kernel) {
   return(list(fHat, S))
 }
 
-df = tibble(y=y)
+df = tibble(y=fx)
 sf = tibble(lambda = purrr::map_chr(listLambda, f))
 
 for (i in 1:length(listLambda)) {
@@ -74,7 +93,7 @@ for (i in 1:length(listLambda)) {
   # assign("name", f("{round(lambda, 5)}"))
   # f("Calculating fitted value for lambda: {lambda}") |> print()
   # varName = f("fHat_{i}")
-  valuesReturn = fitValues(x,y,lambda, kernel)
+  valuesReturn = fitValues(x, fx, lambda, kernel)
   valuesReturn[1][[1]] -> vals
   valuesReturn[2][[1]] -> s
   df[, i+1] <- vals
@@ -94,7 +113,7 @@ Calculate cross validation value [GCV](https://stats.stackexchange.com/questions
 gcv = vector()
 df |> 
   mutate(
-    across(fHat1:fHat50, ~ sum((y-.x)^2)
+    across(fHat1:fHat50, ~ sum((fx-.x)^2)
            )
          ) |> 
   select(-x) |> 
@@ -143,9 +162,9 @@ minGCV  |>
 ```
 
 ```{r}
-minFitFHat <- fitValues(x=x, y=y, kernel=kernel, lambda=minlambdaGCV)
+minFitFHat <- fitValues(x=x, y=fx, kernel=kernel, lambda=minlambdaGCV)
 
-dfOri <- tibble(x, y)
+dfOri <- tibble(x, fx)
 dfMinFit <- tibble(x, lambdaWithMinGCV=minFitFHat[[1]])
 dfOri %>% 
   left_join(dfMinFit, by='x') %>%  # get the corresponding fitted value to x
