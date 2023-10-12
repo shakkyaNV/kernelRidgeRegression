@@ -16,13 +16,30 @@ df %>%
 
 
 # Plot
-df %>%
-  filter(n == 100) %>%
-  select(rmse) %>%
-  ggplot(aes(y = rmse)) +
+
+df |> 
+  select(n, rmse) |> 
+  mutate( n = factor(n)) |> 
+  ggplot(aes(y = rmse, fill = n)) + 
   geom_boxplot()
 
 # mean of items
 df |> 
-  filter(n == 100) |> 
-  pull(rmse) |> mean()
+  select(n, rmse) |> 
+  mutate(n = factor(n)) |> 
+  group_by(n) |> 
+  summarise(mean(rmse))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
