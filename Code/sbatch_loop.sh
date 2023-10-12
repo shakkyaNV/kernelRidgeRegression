@@ -13,7 +13,7 @@ fi
 JOB_NAME='multiD'
 APPEND=$(date +'%H-%M-%b-%d-%Y')
 
-for i in {100..102};
+for i in {100..200};
 do
   sbatch              \
     --job-name=$JOB_NAME \
