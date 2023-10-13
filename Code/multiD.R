@@ -13,8 +13,8 @@ runTimeName = args[5]
 jobname = args[6]
 
 here::i_am("Code/multiD.R")
-library(here, quietly = TRUE)
-library(logger, quietly = TRUE)
+suppressPackageStartupMessages(library(here, quietly = TRUE))
+suppressPackageStartupMessages(library(logger, quietly = TRUE))
 source(here("Code", "utils.R"))
 source(here("Code", "gcv.R"))
 config <- config::get()
@@ -22,7 +22,12 @@ config <- config::get()
 date_time = format(Sys.time(), "%H_%M_%b_%d_%Y")
 # file_name = f("{jobname}_{jobid}_{date_time}")
 file_name = f("{runTimeName}")
-log_appender(appender_tee(here("Logs", f("{file_name}.log"))))
+if (.Platform$GUI == "RStudio") {
+  appender = appender_tee(here("Logs", f("{file_name}.log")))
+} else {
+  appender = appnder_file(here("Logs", f("{file_name}.log")))
+}
+log_appender(appender)
 
 
 ## ----model--------------------------------------

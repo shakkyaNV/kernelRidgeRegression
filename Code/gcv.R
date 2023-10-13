@@ -1,8 +1,8 @@
-require(here, quietly = TRUE)
+suppressPackageStartupMessages(require(here, quietly = TRUE))
 source(here("Code", "utils.R"))
-require(tibble, quietly = TRUE)
-require(tidyr, quietly = TRUE)
-require(dplyr, quietly = TRUE)
+suppressPackageStartupMessages(require(tibble, quietly = TRUE))
+suppressPackageStartupMessages(require(tidyr, quietly = TRUE))
+suppressPackageStartupMessages(require(dplyr, quietly = TRUE))
 
 
 gcvMain <- function(x, fx) {

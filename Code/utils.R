@@ -1,6 +1,6 @@
 ## Util Functions for other codes
-require(magrittr, quietly = TRUE)
-require(rlang, quietly = TRUE)
+suppressPackageStartupMessages(require(magrittr, quietly = TRUE))
+suppressPackageStartupMessages(require(rlang, quietly = TRUE))
 
 ## Utils
 GInv <- MASS::ginv
