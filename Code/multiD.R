@@ -38,9 +38,9 @@ log_info(f("Process Starting: multiDimensional Kernel Regression Metrics Evaluat
 set.seed(seed)
 
 n = n
-functionName <- "DGP2"
+functionName <- "DGP1"
 
-modelVals = modelSp(functionName, n = n, b = 1) # from utils # x returning as matrix, fx as list
+modelVals = modelSp(functionName, n = n) # from utils # x returning as matrix, fx as list
 xargs = modelVals$xargs
 x = modelVals$x
 fx = modelVals$fx
