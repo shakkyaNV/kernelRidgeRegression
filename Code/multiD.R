@@ -2,15 +2,15 @@
 # knitr::opts_chunk$set(echo = TRUE)
 
 rm(list = ls())
-# n=100;sd=0.01;seed=12;jobid=010;jobname="testAll";runTimeName="rep1"
-args <- commandArgs(TRUE)
-parameters <- as.numeric(args[1:4])
-n = parameters[1]
-sd = parameters[2]
-seed = parameters[3]
-jobid = parameters[4]
-runTimeName = args[5]
-jobname = args[6]
+n=100;sd=0.01;seed=12;jobid=010;jobname="testAll";runTimeName="all_test"
+# args <- commandArgs(TRUE)
+# parameters <- as.numeric(args[1:4])
+# n = parameters[1]
+# sd = parameters[2]
+# seed = parameters[3]
+# jobid = parameters[4]
+# runTimeName = args[5]
+# jobname = args[6]
 
 here::i_am("Code/multiD.R")
 suppressPackageStartupMessages(library(here, quietly = TRUE))
@@ -33,14 +33,14 @@ log_appender(appender)
 ## ----model--------------------------------------
 log_info("-----------------------------------------------------")
 log_info(f("Process Starting: multiDimensional Kernel Regression Metrics Evaluation"))
-log_info(f("Parameters Received: {parameters}") %>% skip_formatter())
+# log_info(f("Parameters Received: {parameters}") %>% skip_formatter())
 
 set.seed(seed)
 
 n = n
 functionName <- "DGP2"
 
-modelVals = modelSp(functionName, n = n) # from utils # x returning as matrix, fx as list
+modelVals = modelSp(functionName, n = n, b = 1) # from utils # x returning as matrix, fx as list
 xargs = modelVals$xargs
 x = modelVals$x
 fx = modelVals$fx
@@ -58,95 +58,111 @@ for (i in 1:xDim) { # assign each row to x1, x2 ...>
 
 
 ## ----kernelBuilder------------------------------
+# lambda = 0.0001544701 ## DGP2
+# lambda = 0.0001544701 ## DGP1
 
 bernoulliKernel <- bernoulliKernel
-lambda = 1e-5 #gcvMain(x = x, fx = fx) # optimized according to GCV function
+lambda = 0.0001544701 # gcvMain(x = x, fx = fx) # optimized according to GCV function
 log_info("Best fit is given with lambda value: {round(lambda, 3)}")
 I = diag(1, nrow = n)
-Rkernel = c()
+R_tilda = c()
 
 for (i in 1:xDim) { # R = list(R1, R2)
   
   xi = evalHere(f("x{i}")) 
-  log_info(f("Calculating outer Rkernerl for <x{i}, x{i}>"))
-  assign(f("Rkernel{i}"), outer(xi, xi, bernoulliKernel))
-  Rkernel[f("Rkernel{i}")] = evalHere(f("Rkernel{i}")) %>% list()
+  log_info(f("Calculating outer R_tilda kernel for <x{i}, x{i}>"))
+  R_tilda[i] = { 1- outer(xi, xi, bernoulliKernel) } %>% list()
 }
 
 ## ----kernel and R-------------------------------
-RwoInteractions <- function(Rkernel, xargs) {
-  maxIntOrder = as.numeric(xargs)
-  
-  
-}
-if (functionName == "DGP1") {
-  Rtil1 = 1 - Rkernel$Rkernel1
-  Rtil2 = 1 - Rkernel$Rkernel2
-  
-  R <- 1 + Rtil1 + Rtil2 
-} else if (functionName == "DGP2") {
-  Rtil1 = 1 - Rkernel$Rkernel1
-  Rtil2 = 1 - Rkernel$Rkernel2
-  Rtil3 = 1 - Rkernel$Rkernel3
-  Rtil4 = 1 - Rkernel$Rkernel4
-  Rtil5 = 1 - Rkernel$Rkernel5
-  
-  R <- 1 + Rtil1 + Rtil2 + Rtil3 + Rtil4 + Rtil5 +  
-     Rtil1*Rtil2 + Rtil1*Rtil3 +  Rtil1*Rtil4 +  Rtil1*Rtil5 +   
-     Rtil2*Rtil3 + Rtil2*Rtil4 +  Rtil2*Rtil5 +  
-     Rtil3*Rtil4 + Rtil3*Rtil5  
+
+generate_combs <- function(n) {
+  df = generate_binary_combinations(n) %>% as.data.frame()
+  df = cbind(df, sumDegree = rowSums(df))
+  df = df[order(df$sumDegree, decreasing = FALSE), ]
+  df = df[, -ncol(df)]
+  return(df)
 }
 
-# R = mprod(kernel = Rkernel, xdim = xDim, name = "Rkernel", I = I)
+
+# Rkernel = c()
+# R1 = matrix(seq(1, 9), 3) ;R2 = diag(1, 3)
+# R_tilda = list(R1, R2)
+# R_tilda = c(2, 3, 10)
+
+degree_df = generate_combs(xargs + 1) ## degree combinations
+term_df   = generate_combs(xargs)     ## term combinations
+
+eqn = c()
+rmse_list = c()
 
 
-## ----fHat---------------------------------------
-coef <- (R + n*lambda*I) %>% GInv()
-coef <- coef %*% matrix(y)
+####### ADD Explanation --- LOOKS LIKE WORKING
 
-phi <- R
+for (i in 1:nrow(degree_df)) {                ## Iterate through over all combinations
+  comb = degree_df[i, ] %>% as.numeric()      ## eg: 1 1 0
+  log_info(f("Calculating Interactional RMSE for term_{i}: {comb}") %>% skip_formatter())
+  log_info("-----------------------")
+  poly = polyDegree(xargs, comb)                 ##
+  degree = poly$poly                             ## eg: 1 2 1
+  termSilence = poly$res                         ## eg: 1 1 1 0
+  
+  kernel = 0
+  big_eqn = ""
+  for (j in 1:sum(degree)) {
+    t_df = cbind(term_df, res = termSilence)
+    dg = t_df[j, -ncol(t_df)] %>% unlist()
+    silence = t_df[j, ncol(t_df)] %>% unlist()
+    val = 1
+    little_eqn = ""
+    for (k in 1:xargs) {
+      val = silence * val * R_tilda[[k]]^dg[[k]]
+      little_eqn = paste0(little_eqn, f("{silence}xR_tilda{k}^{dg[[k]]} x "))
+    }
+    little_eqn = substr(little_eqn, 1, nchar(little_eqn) - 2)
+    
+    big_eqn = paste0(big_eqn, little_eqn, "+ ")
+    kernel = kernel + val
+    
+  }
+  big_eqn = substr(big_eqn, 1, nchar(big_eqn) - 2)
+  log_info(f("Calculated Rkernel for: {big_eqn}"))
+  R <- kernel
+  eqn[[i]] <- big_eqn
+  # R_list[[i]] <- R
+  
+  # ----fHat---------------------------------------
+  coef <- (R + n*lambda*I) %>% GInv()
+  coef <- coef %*% matrix(y)
 
-fHat <- {t(phi) %*% coef } %>% c()
+  phi <- R
+
+  fHat <- {t(phi) %*% coef } %>% c()
 
 
-## ----metrics------------------------------------
-fHat_rmse = Metrics::rmse(fHat, y)
-log_info(f("Calculated RMSE: {round(fHat_rmse, 2)}"))
+  ## ----metrics------------------------------------
+  fHat_rmse = Metrics::rmse(fHat, y)
+  rmse_list[[i]] = fHat_rmse
+  log_info(f("Calculated RMSE: {round(fHat_rmse, 2)}"))
+
+}
+
+min_rmse_index = which.min(rmse_list)
+min_rmse_eqn = eqn[min_rmse_index]
+
+log_info(f("Minimum RMSE Reported: {rmse_list[min_rmse_index]}"))
+log_info(f("For element degrees: {degree_df[min_rmse_index, ]}") %>% skip_formatter())
+log_info(f("For equation: {min_rmse_eqn}"))
+
 
 # write the metrics to a file
-valsList = list(n = n, sd = sd, seed = seed, rmse = fHat_rmse)
+valsList = list(n = n, sd = sd, seed = seed, rmse = rmse_list)
 readr::write_csv(as.data.frame(valsList), file = here("Data", f("{runTimeName}.csv")), append = TRUE, col_names = FALSE)
 
 log_info(f("File saved: {as.character(here('Data'))}{.Platform$file.sep}{file_name}.csv"))
 log_info(f("File has colnames: {names(valsList)}") %>% logger::skip_formatter())
-
-## ----visualizex1--------------------------------
-# require(dplyr)
-# require(ggplot2)
-# 
-# x <- x1
-# dfOri <- tibble(x, y)
-# dfFit <- tibble(x, fHat)
-# dfOri %>% 
-#   left_join(dfFit, by='x') %>%  # get the corresponding fitted value to x
-#   reshape2::melt(id='x') %>% # flatten the table so that we can plot as one variable but two groups
-#   ggplot() + 
-#   geom_point(aes(x=x, y=value, col=variable)) + 
-#   labs(title = "(x1,y) and (x1, FHat)")
-# 
-# 
-# ## ----visualizex2--------------------------------
-# x <- x2
-# dfOri <- tibble(x, y)
-# dfFit <- tibble(x, fHat)
-# dfOri %>% 
-#   left_join(dfFit, by='x') %>%  # get the corresponding fitted value to x
-#   reshape2::melt(id='x') %>% # flatten the table so that we can plot as one variable but two groups
-#   ggplot() + 
-#   geom_point(aes(x=x, y=value, col=variable)) + 
-#   labs(title = "(x2, y) and (x2, FHat)")
-# 
-
-## -----------------------------------------------
 log_info("Code Finalized")
+
+
+
 
