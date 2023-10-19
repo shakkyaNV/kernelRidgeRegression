@@ -1,6 +1,7 @@
 ## Util Functions for other codes
 suppressPackageStartupMessages(require(magrittr, quietly = TRUE))
 suppressPackageStartupMessages(require(rlang, quietly = TRUE))
+suppressPackageStartupMessages(require(numbers, quietly = TRUE))
 
 ## Utils
 GInv <- MASS::ginv
@@ -88,7 +89,6 @@ DGP1 <- function(x, q, beta, b = 1, numXArgs = 2) {
   g03 <- function(x1, x2) {
     return(1.5*exp(x1 + x2))
   }
-  
   val = g01(x1) + g02(x2) + b*g03(x1, x2)
   return(val)
 }
@@ -170,11 +170,74 @@ evalHere <- function(x) {  # since we're going to be using this heavily. A wrapp
   return(base::eval(base::parse(text=x)))
 }
 
+## zip equivalent for python
+
+zip <- function(...) {
+  return(mapply(list, ..., SIMPLIFY = FALSE))
+}
+
+
+
+generate_binary_combinations <- function(n) {
+  n = evalHere(f("{n}L"))
+  
+  # Checks
+  if ((!is.integer(n)) | (length(n) != 1)) {
+    stop("n should be a vector of length 1. Integer values only")
+  }
+  
+  if (n == 0) {
+    return(matrix(0, 1, 1))
+  }
+  else if (n == 1) {
+    return(matrix(c(0, 1), 2, 1))
+  }
+  else {
+    previous_combinations <- generate_binary_combinations(n - 1)
+    heads <- cbind(previous_combinations, 0)
+    tails <- cbind(previous_combinations, 1)
+    return(rbind(heads, tails))
+  }
+}
 
 
 
 
-
+polyDegree <- function(xargs, npoly) {
+  # This function should output a vector in accordance with
+  # input xargs.
+  # Eg: if xargs = 2
+  # polynomial would be (1 + x1 + x2 + x1x2)
+  # respective degrees are (0 degree, 1st degree, 1st degree, 2nd degree)
+  # output (1, 1, 1, 0) ==> means we have silenced 2nd order degree interactions
+  xargs = evalHere(f("{xargs}L"))
+  
+  # Checks
+  if ((!is.integer(xargs)) | (length(xargs) != 1)) {
+    stop("xargs should be a vector of length 1. Integer values only")
+  }
+  polyTerms <- pascal_triangle(xargs)[xargs + 1, ] ## pascal triangle row for xargs degree of polyn. Eg: xargs = 2.... 1 2 1
+  nTerms    <- sum(polyTerms)            ## Number of all terms is equal to sum Eg: xargs = 2... Total terms = 4 [1 + x1 + x2 + x1x2]
+  nDegree <- length(polyTerms)           ## number of degree. For above example this should be 3. 0th order (1), 1st order( x1 and x2) , 2nd order(x1x2)
+  
+  if (missing(npoly)) {
+    npoly = rep(1, nDegree)
+  }
+  
+  if (!is.vector(npoly) | (length(npoly) != nDegree) | any(!(unique(npoly) %in% c(0, 1))) ) {
+    stop("npoly should either be a vector of respective length for xargs. Each element should be zero or one")
+  }
+  
+  # Calc
+  zipped <- zip(polyTerms, npoly)
+  res = c()
+  
+  for (i in 1:nDegree) {
+    res = append(res, rep(zipped[[i]][[2]], zipped[[i]][[1]]))
+  }
+  
+  return(list(res=res, poly=polyTerms))
+}
 
 
 
