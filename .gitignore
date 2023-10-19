@@ -42,3 +42,5 @@ Data/
 kernelRidgeRegression.Rproj
 *.out # specifically to ignore nohup.out
 *.jpeg
+*.Rhistory
+*.out
