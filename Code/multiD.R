@@ -1,8 +1,8 @@
 ## ----setup, include=FALSE-----------------------
 # knitr::opts_chunk$set(echo = TRUE)
 
-rm(list = ls())
-n=100;sd=0.01;seed=12;jobid=010;jobname="testAll";runTimeName="all_test"
+# rm(list = ls())
+n=100;sd=0.01;seed=12;jobid=010;jobname="testAll";runTimeName="testinglogging"
 # args <- commandArgs(TRUE)
 # parameters <- as.numeric(args[1:4])
 # n = parameters[1]
@@ -33,7 +33,7 @@ log_appender(appender)
 ## ----model--------------------------------------
 log_info("-----------------------------------------------------")
 log_info(f("Process Starting: multiDimensional Kernel Regression Metrics Evaluation"))
-# log_info(f("Parameters Received: {parameters}") %>% skip_formatter())
+# log_info(f("Parameters Received: {paste(parameters, collapse = ', ')}"))
 
 set.seed(seed)
 
@@ -62,7 +62,7 @@ for (i in 1:xDim) { # assign each row to x1, x2 ...>
 # lambda = 0.0001544701 ## DGP1
 
 bernoulliKernel <- bernoulliKernel
-lambda = 0.0001544701 # gcvMain(x = x, fx = fx) # optimized according to GCV function
+lambda = 0.000014 #gcvMain(x = x, fx = fx) # optimized according to GCV function
 log_info("Best fit is given with lambda value: {round(lambda, 3)}")
 I = diag(1, nrow = n)
 R_tilda = c()
@@ -101,7 +101,7 @@ rmse_list = c()
 
 for (i in 1:nrow(degree_df)) {                ## Iterate through over all combinations
   comb = degree_df[i, ] %>% as.numeric()      ## eg: 1 1 0
-  log_info(f("Calculating Interactional RMSE for term_{i}: {comb}") %>% skip_formatter())
+  log_info(f("Calculating Interactional RMSE for term {i}/{nrow(degree_df)}: {paste(comb, collapse = ', ')}"))
   log_info("-----------------------")
   poly = polyDegree(xargs, comb)                 ##
   degree = poly$poly                             ## eg: 1 2 1
@@ -126,7 +126,7 @@ for (i in 1:nrow(degree_df)) {                ## Iterate through over all combin
     
   }
   big_eqn = substr(big_eqn, 1, nchar(big_eqn) - 2)
-  log_info(f("Calculated Rkernel for: {big_eqn}"))
+  # log_info(f("Calculated Rkernel for: {big_eqn}"))
   R <- kernel
   eqn[[i]] <- big_eqn
   # R_list[[i]] <- R
@@ -141,19 +141,44 @@ for (i in 1:nrow(degree_df)) {                ## Iterate through over all combin
 
 
   ## ----metrics------------------------------------
-  fHat_rmse = Metrics::rmse(fHat, y)
+  fHat_rmse = Metrics::rmse(fHat, unlist(fx))
   rmse_list[[i]] = fHat_rmse
   log_info(f("Calculated RMSE: {round(fHat_rmse, 2)}"))
 
 }
 
+df = data.frame(rmse = unlist(rmse_list)) %>% rownames_to_column(var = "id")
+df = df[order(df$rmse, decreasing = FALSE), ]
+rownames(df) <- seq(1, nrow(df), 1)
+
+
+log_info("********* MIN 5**************")
+for (i in 1:5) {
+  log_info(f("{i}th least rmse: {df[i, 2]}, For element order: {paste(degree_df[df[i, 1], ], collapse = ', ')}"))
+}
+
+log_info("*********** WANTED ************")
+
+if (functionName == "DGP1") {
+  des_index = 8
+} else if (functionName == "DGP2") {
+  des_index = 8
+}
+
+log_info(f("{functionName} RMSE for (1, 1, 1): {paste(df[df$id == des_index, 2], collapse = ', ')}"))
+log_info(f("Element order (for confirmation): {paste(degree_df[as.numeric(df[df$id == des_index, 1]), ], collapse = ', ')}"))
+
+
 min_rmse_index = which.min(rmse_list)
 min_rmse_eqn = eqn[min_rmse_index]
 
+log_info("********** MINIMUM **************")
+
 log_info(f("Minimum RMSE Reported: {rmse_list[min_rmse_index]}"))
-log_info(f("For element degrees: {degree_df[min_rmse_index, ]}") %>% skip_formatter())
+log_info(f("For Element with degree order: {paste(degree_df[which.min(rmse_list), ], collapse = ', ')}"))
 log_info(f("For equation: {min_rmse_eqn}"))
 
+log_info("************************")
 
 # write the metrics to a file
 valsList = list(n = n, sd = sd, seed = seed, rmse = rmse_list)
@@ -162,7 +187,4 @@ readr::write_csv(as.data.frame(valsList), file = here("Data", f("{runTimeName}.c
 log_info(f("File saved: {as.character(here('Data'))}{.Platform$file.sep}{file_name}.csv"))
 log_info(f("File has colnames: {names(valsList)}") %>% logger::skip_formatter())
 log_info("Code Finalized")
-
-
-
 
