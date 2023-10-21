@@ -1,7 +1,6 @@
 ## Util Functions for other codes
 suppressPackageStartupMessages(require(magrittr, quietly = TRUE))
 suppressPackageStartupMessages(require(rlang, quietly = TRUE))
-suppressPackageStartupMessages(require(numbers, quietly = TRUE))
 
 ## Utils
 GInv <- MASS::ginv
@@ -215,7 +214,24 @@ generate_binary_combinations <- function(n) {
   }
 }
 
-
+pascal_triangle = function (n) {
+  stopifnot(is.numeric(n))
+  if (length(n) != 1 || floor(n) != ceiling(n) || n < 0) 
+    stop("Argument 'n' must be a single integer.")
+  if (n > 50) 
+    stop("Integer overflow: Argument 'n' must be <= 50.", 
+         call. = FALSE)
+  P <- matrix(0, nrow = n + 1, ncol = n + 1)
+  P[1, 1] <- 1
+  if (n == 0) 
+    return(P)
+  for (i in 1:n) {
+    j <- i + 1
+    P[j, 1] <- 1
+    P[j, 2:j] <- P[i, 1:i] + P[i, 2:j]
+  }
+  return(P)
+}
 
 
 polyDegree <- function(xargs, npoly) {
@@ -231,7 +247,7 @@ polyDegree <- function(xargs, npoly) {
   if ((!is.integer(xargs)) | (length(xargs) != 1)) {
     stop("xargs should be a vector of length 1. Integer values only")
   }
-  polyTerms <- numbers::pascal_triangle(xargs)[xargs + 1, ] ## pascal triangle row for xargs degree of polyn. Eg: xargs = 2.... 1 2 1
+  polyTerms <- pascal_triangle(xargs)[xargs + 1, ] ## pascal triangle row for xargs degree of polyn. Eg: xargs = 2.... 1 2 1
   nTerms    <- sum(polyTerms)            ## Number of all terms is equal to sum Eg: xargs = 2... Total terms = 4 [1 + x1 + x2 + x1x2]
   nDegree <- length(polyTerms)           ## number of degree. For above example this should be 3. 0th order (1), 1st order( x1 and x2) , 2nd order(x1x2)
   
