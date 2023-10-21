@@ -3,6 +3,7 @@ source(here("Code", "utils.R"))
 suppressPackageStartupMessages(require(tibble, quietly = TRUE))
 suppressPackageStartupMessages(require(tidyr, quietly = TRUE))
 suppressPackageStartupMessages(require(dplyr, quietly = TRUE))
+select <- dplyr::select
 
 
 gcvMain <- function(x, fx) {
