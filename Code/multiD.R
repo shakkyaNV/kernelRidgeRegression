@@ -24,7 +24,7 @@ file_name = f("{runTimeName}")
 if (.Platform$GUI == "RStudio") {
   appender = appender_tee(here("Logs", f("{file_name}.log")))
 } else {
-  appender = appnder_file(here("Logs", f("{file_name}.log")))
+  appender = appender_file(here("Logs", f("{file_name}.log")))
 }
 log_appender(appender)
 
