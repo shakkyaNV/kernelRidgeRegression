@@ -2,7 +2,7 @@
 # knitr::opts_chunk$set(echo = TRUE)
 
 rm(list = ls())
-# n=100;sd=0.01;seed=12;jobid=010;jobname="testAll";runTimeName="testinglogging"
+# n=100;sd=0.01;seed=12;jobid=010;jobname="testAll";runTimeName="newLocalRun";parameters = c(1, 2)
 args <- commandArgs(TRUE)
 parameters <- as.numeric(args[1:4])
 n = parameters[1]
@@ -173,8 +173,10 @@ log_info(f("For equation: {min_rmse_eqn}"))
 log_info("************************")
 
 # write the metrics to a file
-valsList = list(n = n, sd = sd, seed = seed, rmse = rmse_list)
-readr::write_csv(as.data.frame(valsList), file = here("Data", f("{runTimeName}.csv")), append = TRUE, col_names = FALSE)
+degree_df = rownames_to_column(degree_df)
+df = merge(df, degree_df)
+df$n = n; df$sd = sd; df$seed = seed
+readr::write_csv(df, file = here("Data", f("{runTimeName}.csv")), append = TRUE, col_names = FALSE)
 
 log_info(f("File saved: {as.character(here('Data'))}{.Platform$file.sep}{file_name}.csv"))
 log_info(f("File has colnames: {names(valsList)}") %>% logger::skip_formatter())
