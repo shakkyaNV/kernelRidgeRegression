@@ -39,7 +39,7 @@ bernoulliKernel <- function(x, y, m=2) {
     textToEval <- paste0("b", v) # create the function name
     rKernel = rKernel + 
       ((textToEval %>%
-          call2(., x = x) %>% eval()) + # call2 creates a function call, eval evaluates
+          call2(., x = x) %>% eval()) * # call2 creates a function call, eval evaluates
          (textToEval %>%
             call2(., x = y) %>% eval())) / (factorial(v) ^ 2)
   } 
@@ -129,9 +129,9 @@ DGP2 <- function(x, q, beta, b = 1, numXArgs = 5) {
 }
 
 
-DBETA <- function(x, b = 1, numXArgs = 2) {
+DBETA <- function(x, b = 0, numXArgs = 1) {
   if(!is.matrix(x)){
-    stop("Input X must be a matrix [2x100]")
+    stop("Input X must be a matrix")
   }
   
   numXArgs = min(dim(x))
@@ -142,11 +142,11 @@ DBETA <- function(x, b = 1, numXArgs = 2) {
   g01 <- function(x1){
     return(dbeta(x1, 5, 20))
   }
-  g02 <- function(x2) {
-    return(dbeta(x2, 30, 5))
+  g02 <- function(x1) {
+    return(dbeta(x1, 30, 5))
   }
   
-  val = g01(x1) + g02(x2) + b*(g01(x1) * g02(x2))
+  val = g01(x1) + g02(x1) + b*(g01(x1) * g02(x1))
   return(val)
 }
 
