@@ -1,7 +1,7 @@
 ## Util Functions for other codes
 suppressPackageStartupMessages(require(magrittr, quietly = TRUE))
 suppressPackageStartupMessages(require(rlang, quietly = TRUE))
-# suppressPackageStartupMessages(require(numbers, quietly = TRUE))
+suppressPackageStartupMessages(require(numbers, quietly = TRUE))
 
 ## Utils
 GInv <- MASS::ginv
