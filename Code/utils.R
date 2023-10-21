@@ -1,7 +1,7 @@
 ## Util Functions for other codes
 suppressPackageStartupMessages(require(magrittr, quietly = TRUE))
 suppressPackageStartupMessages(require(rlang, quietly = TRUE))
-suppressPackageStartupMessages(require(numbers, quietly = TRUE))
+# suppressPackageStartupMessages(require(numbers, quietly = TRUE))
 
 ## Utils
 GInv <- MASS::ginv
@@ -66,13 +66,10 @@ DGP1 <- function(x, q, beta, b = 1, numXArgs = 2) {
   # no question if you don't pass it in to the function
   # check
   if(!is.matrix(x)){
-    stop("Input X must be a matrix [2x100]")
+    stop("Input X must be a matrix.")
   }
   if (min(dim(x)) != 2) {
-    stop(f("Input Matrix not of correct Dimension: [2x100]. Input dim: {dim(x)}"))
-  }
-  if (dim(x)[1] != 2) {
-    x = t(x)
+    stop(f("Input Matrix not of correct Dimensiom. Input dim: {dim(x)}"))
   }
   
   numXArgs = min(dim(x))
@@ -104,9 +101,6 @@ DGP2 <- function(x, q, beta, b = 1, numXArgs = 5) {
   if (min(dim(x)) != 5) {
     stop(f("Input Matrix not of correct Dimension: [2x100]. Input dim: {dim(x)}"))
   }
-  if (dim(x)[1] != 5) {
-    x = t(x)
-  }
   
   numXArgs = min(dim(x))
   for (i in 1:numXArgs) {
@@ -135,6 +129,27 @@ DGP2 <- function(x, q, beta, b = 1, numXArgs = 5) {
 }
 
 
+DBETA <- function(x, b = 1, numXArgs = 2) {
+  if(!is.matrix(x)){
+    stop("Input X must be a matrix [2x100]")
+  }
+  
+  numXArgs = min(dim(x))
+  for (i in 1:numXArgs) {
+    assign(paste0("x", i), x[i, ]  %>% unlist())
+  }
+  
+  g01 <- function(x1){
+    return(dbeta(x1, 5, 20))
+  }
+  g02 <- function(x2) {
+    return(dbeta(x2, 30, 5))
+  }
+  
+  val = g01(x1) + g02(x2) + b*(g01(x1) * g02(x2))
+  return(val)
+}
+
 ## Pull data into code with
 modelSp <- function(functionName, n, ...) {
   # get the function name from input and determine the x1, x2,,, dimension on its own
@@ -147,11 +162,11 @@ modelSp <- function(functionName, n, ...) {
   for (arg in 1:xargs) {
     x <- append(x, runif(n))
   }
-  
-  x <- matrix(x, ncol = n) # num_x_args x n matrix
+  x = sort(unlist(x))
+  x <- matrix(x, nrow = xargs, byrow = TRUE) # num_x_args x n matrix
   fx <- rlang::call2(functionName, x, ...)  %>% 
-    eval
-  fx <- fx
+    eval()
+  
   return(list(x=x, fx=fx, xargs=xargs))
 }
 
@@ -216,7 +231,7 @@ polyDegree <- function(xargs, npoly) {
   if ((!is.integer(xargs)) | (length(xargs) != 1)) {
     stop("xargs should be a vector of length 1. Integer values only")
   }
-  polyTerms <- pascal_triangle(xargs)[xargs + 1, ] ## pascal triangle row for xargs degree of polyn. Eg: xargs = 2.... 1 2 1
+  polyTerms <- numbers::pascal_triangle(xargs)[xargs + 1, ] ## pascal triangle row for xargs degree of polyn. Eg: xargs = 2.... 1 2 1
   nTerms    <- sum(polyTerms)            ## Number of all terms is equal to sum Eg: xargs = 2... Total terms = 4 [1 + x1 + x2 + x1x2]
   nDegree <- length(polyTerms)           ## number of degree. For above example this should be 3. 0th order (1), 1st order( x1 and x2) , 2nd order(x1x2)
   
