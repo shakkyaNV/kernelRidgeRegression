@@ -1,16 +1,16 @@
 ## ----setup, include=FALSE-----------------------
 # knitr::opts_chunk$set(echo = TRUE)
 
-# rm(list = ls())
-n=100;sd=0.01;seed=12;jobid=010;jobname="testAll";runTimeName="testinglogging"
-# args <- commandArgs(TRUE)
-# parameters <- as.numeric(args[1:4])
-# n = parameters[1]
-# sd = parameters[2]
-# seed = parameters[3]
-# jobid = parameters[4]
-# runTimeName = args[5]
-# jobname = args[6]
+rm(list = ls())
+# n=100;sd=0.01;seed=12;jobid=010;jobname="testAll";runTimeName="testinglogging"
+args <- commandArgs(TRUE)
+parameters <- as.numeric(args[1:4])
+n = parameters[1]
+sd = parameters[2]
+seed = parameters[3]
+jobid = parameters[4]
+runTimeName = args[5]
+jobname = args[6]
 
 here::i_am("Code/multiD.R")
 suppressPackageStartupMessages(library(here, quietly = TRUE))
@@ -20,7 +20,6 @@ source(here("Code", "gcv.R"))
 config <- config::get()
 
 date_time = format(Sys.time(), "%H_%M_%b_%d_%Y")
-# file_name = f("{jobname}_{jobid}_{date_time}")
 file_name = f("{runTimeName}")
 if (.Platform$GUI == "RStudio") {
   appender = appender_tee(here("Logs", f("{file_name}.log")))
@@ -33,12 +32,12 @@ log_appender(appender)
 ## ----model--------------------------------------
 log_info("-----------------------------------------------------")
 log_info(f("Process Starting: multiDimensional Kernel Regression Metrics Evaluation"))
-# log_info(f("Parameters Received: {paste(parameters, collapse = ', ')}"))
+log_info(f("Parameters Received: {paste(parameters, collapse = ', ')}"))
 
 set.seed(seed)
 
 n = n
-functionName <- "DGP1"
+functionName <- "DGP2"
 
 modelVals = modelSp(functionName, n = n) # from utils # x returning as matrix, fx as list
 xargs = modelVals$xargs
@@ -62,7 +61,7 @@ for (i in 1:xDim) { # assign each row to x1, x2 ...>
 # lambda = 0.0001544701 ## DGP1
 
 bernoulliKernel <- bernoulliKernel
-lambda = 0.000014 #gcvMain(x = x, fx = fx) # optimized according to GCV function
+lambda = gcvMain(x = x, fx = fx) # optimized according to GCV function
 log_info("Best fit is given with lambda value: {round(lambda, 3)}")
 I = diag(1, nrow = n)
 R_tilda = c()
@@ -83,12 +82,6 @@ generate_combs <- function(n) {
   df = df[, -ncol(df)]
   return(df)
 }
-
-
-# Rkernel = c()
-# R1 = matrix(seq(1, 9), 3) ;R2 = diag(1, 3)
-# R_tilda = list(R1, R2)
-# R_tilda = c(2, 3, 10)
 
 degree_df = generate_combs(xargs + 1) ## degree combinations
 term_df   = generate_combs(xargs)     ## term combinations
@@ -126,10 +119,9 @@ for (i in 1:nrow(degree_df)) {                ## Iterate through over all combin
     
   }
   big_eqn = substr(big_eqn, 1, nchar(big_eqn) - 2)
-  # log_info(f("Calculated Rkernel for: {big_eqn}"))
+  log_info(f("Calculated Rkernel for: {big_eqn}"))
   R <- kernel
   eqn[[i]] <- big_eqn
-  # R_list[[i]] <- R
   
   # ----fHat---------------------------------------
   coef <- (R + n*lambda*I) %>% GInv()
