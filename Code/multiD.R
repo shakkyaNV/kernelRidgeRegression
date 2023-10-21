@@ -173,12 +173,13 @@ log_info(f("For equation: {min_rmse_eqn}"))
 log_info("************************")
 
 # write the metrics to a file
-degree_df = rownames_to_column(degree_df)
-df = merge(df, degree_df)
+degree_df = degree_df %>% rownames_to_column('id')
+df = merge(df, degree_df, by = 'id')
 df$n = n; df$sd = sd; df$seed = seed
+
 readr::write_csv(df, file = here("Data", f("{runTimeName}.csv")), append = TRUE, col_names = FALSE)
 
 log_info(f("File saved: {as.character(here('Data'))}{.Platform$file.sep}{file_name}.csv"))
-log_info(f("File has colnames: {names(valsList)}") %>% logger::skip_formatter())
+log_info(f("File has colnames: {paste(names(df), collapse = ', ')}"))
 log_info("Code Finalized")
 
