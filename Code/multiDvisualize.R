@@ -4,11 +4,13 @@ source(here("Code", "utils.R"))
 library(ggplot2)
 library(dplyr)
 
-## Execute following in terminal while in Data folder
-## scp sranasin@quanah.hpcc.ttu.edu:/home/sranasin/kernelRidgeRegression/Data/datamultiD.csv .
+file_name = "woDGP2Int1.csv" 
+file_for = "with First Order Interactions DGP2"
 
-# file_name = "RealTest1.csv"
-file_name = "RealTest2.csv"
+print(f("scp sranasin@quanah.hpcc.ttu.edu:/home/sranasin/kernelRidgeRegression/Data/{file_name} ."))
+
+## --Pull the file in terminal -- ##
+
 df = readr::read_csv(here("Data", file_name), 
                      col_names = c("n", "sd", "seed", "rmse"))
 df %>% 
@@ -21,7 +23,11 @@ df |>
   select(n, rmse) |> 
   mutate( n = factor(n)) |> 
   ggplot(aes(y = rmse, fill = n)) + 
-  geom_boxplot()
+  geom_boxplot() + 
+  ggtitle(file_for) + 
+  ylim(0, 10)
+
+ggsave(filename = here("Data", f("{file_for}.jpeg")))
 
 # mean of items
 df |> 
