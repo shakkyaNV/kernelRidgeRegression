@@ -2,15 +2,15 @@
 # knitr::opts_chunk$set(echo = TRUE)
 
 rm(list = ls())
-# n=100;sd=0.01;seed=12;jobid=010;jobname="testAll";runTimeName="newLocalRun";parameters = c(1, 2)
-args <- commandArgs(TRUE)
-parameters <- as.numeric(args[1:4])
-n = parameters[1]
-sd = parameters[2]
-seed = parameters[3]
-jobid = parameters[4]
-runTimeName = args[5]
-jobname = args[6]
+n=100;sd=0.01;seed=12;jobid=010;jobname="testAll";runTimeName="newLocalRun";parameters = c(1, 2)
+# args <- commandArgs(TRUE)
+# parameters <- as.numeric(args[1:4])
+# n = parameters[1]
+# sd = parameters[2]
+# seed = parameters[3]
+# jobid = parameters[4]
+# runTimeName = args[5]
+# jobname = args[6]
 
 here::i_am("Code/multiD.R")
 suppressPackageStartupMessages(library(here, quietly = TRUE))
