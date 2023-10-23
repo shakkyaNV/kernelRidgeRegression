@@ -153,11 +153,16 @@ log_info("*********** WANTED ************")
 
 if (functionName == "DGP1") {
   des_index = 8
+  pattern = "1, 1, 1"
 } else if (functionName == "DGP2") {
-  des_index = 8
+  des_index = 4
+  pattern = "1, 1, 0, 0, 0, 0"
+} else {
+  des_index = 1
+  pattern = "Unknown"
 }
 
-log_info(f("{functionName} RMSE for (1, 1, 1): {paste(df[df$id == des_index, 2], collapse = ', ')}"))
+log_info(f("{functionName} RMSE for ({pattern}): {paste(df[df$id == des_index, 2], collapse = ', ')}"))
 log_info(f("Element order (for confirmation): {paste(degree_df[as.numeric(df[df$id == des_index, 1]), ], collapse = ', ')}"))
 
 
