@@ -37,7 +37,7 @@ log_info(f("Parameters Received: {paste(parameters, collapse = ', ')}"))
 set.seed(seed)
 
 n = n
-functionName <- "DGP2"
+functionName <- "DGP1"
 
 modelVals = modelSp(functionName, n = n) # from utils # x returning as matrix, fx as list
 xargs = modelVals$xargs
@@ -62,7 +62,7 @@ for (i in 1:xDim) { # assign each row to x1, x2 ...>
 
 bernoulliKernel <- bernoulliKernel
 lambda = gcvMain(x = x, fx = fx) # optimized according to GCV function
-log_info("Best fit is given with lambda value: {round(lambda, 3)}")
+log_info("Best fit is given with lambda value: {lambda}")
 I = diag(1, nrow = n)
 R_tilda = c()
 
