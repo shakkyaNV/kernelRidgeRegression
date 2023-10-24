@@ -154,7 +154,7 @@ log_info("*********** WANTED ************")
 if (functionName == "DGP1") {
   des_index = 8
   pattern = "1, 1, 1"
-} else if (functionName == "DGP2") {
+} else if (functionName == "DGP1") {
   des_index = 4
   pattern = "1, 1, 0, 0, 0, 0"
 } else {
