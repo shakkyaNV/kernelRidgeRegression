@@ -12,7 +12,7 @@ jobid = parameters[4]
 runTimeName = args[5]
 jobname = args[6]
 
-here::i_am("Code/multiD.R")
+suppressMessages(here::i_am("Code/multiD.R"))
 suppressPackageStartupMessages(library(here, quietly = TRUE))
 suppressPackageStartupMessages(library(logger, quietly = TRUE))
 source(here("Code", "utils.R"))
