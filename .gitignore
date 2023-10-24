@@ -41,6 +41,7 @@ Logs/
 Data/
 kernelRidgeRegression.Rproj
 *.out # specifically to ignore nohup.out
+*.jpeg # ignoring all plot outputs
 *.jpeg
 *.Rhistory
 *.out
