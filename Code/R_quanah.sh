@@ -7,9 +7,9 @@ runTimeName=$3
 
 module load intel R
 
-for n in 100 200
+for n in 250 350
 do
-	for sd in 1 1
+	for sd in 0.01 0.02
 	do
 		Rscript $PATH_TO_KRR/Code/$filename.R $n $sd $randomseed $SLURM_JOB_ID $runTimeName $SLURM_JOB_NAME;
 	done
