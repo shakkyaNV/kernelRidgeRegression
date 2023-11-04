@@ -2,3 +2,10 @@ default:
   path_to_data: "/home/sranasin/kernelRidgeRegression/Data"
   path_to_logs: "/home/sranasin/kernelRidgeRegression/Logs"
   path_to_code: "/home/sranasin/kernelRidgeRegression/Code"
+  something: 10
+  sample_size: 100
+  sd: 0.01
+  b: 0
+  B: 1000
+  seed: 666
+  alpha: 0.05
