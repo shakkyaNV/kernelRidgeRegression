@@ -177,6 +177,16 @@ mprod <- function(kernel, xdim, name, I) {
   return(R)
 }
 
+mprodId <- function(kernel) {
+  xdim = length(kernel)
+  n = dim(kernel[[1]])[1]
+  p = dim(kernel[[1]])[2]
+  R <- matrix(rep(1, n*p), nrow = n)
+  for (i in 1:xdim) {
+    R = R * kernel[[i]]
+  }
+  return(R)
+}
 
 evalHere <- function(x) {  # since we're going to be using this heavily. A wrapper
   # This function force evaluate the glued content
