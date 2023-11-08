@@ -1,77 +1,108 @@
+##################################### SETUP ####################################
+
 rm(list = ls())
+
+if (.Platform$GUI == "RStudio") {
+  n=100;sd=0.01;seed=12;jobid=010;jobname="testAll";
+  runTimeName="newLocalRun";parameters = c(1, 2);b=0;B=10;alpha=0.05
+} else {
+  args <- commandArgs(TRUE)
+  parameters <- as.numeric(args[1:4])
+  n = parameters[1]
+  sd = parameters[2]
+  seed = parameters[3]
+  jobid = parameters[4]
+  runTimeName = args[5]
+  jobname = args[6]
+}
+
+
 library(here)
 suppressMessages(source(here("Code", "utils.R")))
+suppressMessages(library(logger, quietly = TRUE))
 suppressMessages(source(here("Code", "gcv.R")))
 config <- config::get()
 
 
+date_time = format(Sys.time(), "%H_%M_%b_%d_%Y")
+file_name = f("{runTimeName}")
+if (.Platform$GUI == "RStudio") {
+  appender = appender_tee(here("Logs", f("{file_name}.log")))
+} else {
+  appender = appender_file(here("Logs", f("{file_name}.log")))
+}
+log_appender(appender)
+
+
 ##################### UNSCALED ORIGINAL PROCEDURE ##############################
-n <- config$sample_size
-sd <- config$sd
-b <- config$b
-B <- config$B
-seed <- config$seed
-alpha <- config$alpha
-# B = 100
 
-set.seed(Sys.time())
+set.seed(seed)
+log_info("-----------------------------------------------------")
+log_info(f("Process Starting: Epsilon Bootrap procedure for power function"))
+log_info(f("Parameters Received: {paste(parameters, collapse = ', ')}"))
 
+
+#################################### INPUT #####################################
+
+n = n
 functionName <- "DGP1"
 
 modelVals = modelSp(functionName, n = n)
 xargs = modelVals$xargs
-x = modelVals$x
-fx = modelVals$fx
-y = {b*fx} + rnorm(n, mean = 0, sd = sd)
+x <<- modelVals$x                          # global
+fx<<- modelVals$fx                         # global
+y <<- {b*fx} + rnorm(n, mean = 0, sd = sd) # global
+lambda <<-  gcvMain(x=x, fx=fx)            # global
+
+################################################################################
 
 
 bernoulliKernel <- bernoulliKernel
+p = as.integer(runif(1, n-10, n))
+modelVals_p = modelSp(functionName, n=p)
+xp <<- modelVals_p$x
+#fxnew = modelVlas_p$fx # we don't need fx. So we disregard
 
-mprodId <- function(kernel) {
-  xdim = length(kernel)
-  n = dim(kernel[[1]])[1]
-  R <- matrix(rep(1, n*n), nrow = n)
-  for (i in 1:xdim) {
-    R = R * kernel[[i]]
-  }
-  return(R)
-}
-
-calcFHat <- function(x, fx, kernel, wmat=0) {
-  n = max(dim(x))
-  xDim = min(dim(x))
+calcFHat <- function(X, x, kernel, wmat=0) {
+  
+  n = max(dim(X))
+  p = max(dim(x))
+  xDim = min(dim(X))
+  
+  Xi = c()
+  xi = c()
+  
   if (missing(wmat)) {
     wmat = diag(1, nrow = n)
   }
   
-  xi = c()
-  
+  for (i in 1:xDim) { # assign each row to x1, x2 ...>
+    Xi[[i]] = X[i, ] %>% unlist()
+  }
   for (i in 1:xDim) { # assign each row to x1, x2 ...>
     xi[[i]] = x[i, ] %>% unlist()
   }
-  
-  lambda = gcvMain(x = x, fx = fx) # optimized according to GCV function
+
   # log_info("Best fit is given with lambda value: {lambda}")
   I = diag(1, nrow = n)
-  
   R <- c()
+  phi <- c()
   for (i in 1:xDim) { # R = list(R1, R2)
     # log_info(f("Calculating outer R_tilda kernel for <x{i}, x{i}>"))
-    R[i] = outer(xi[[i]], xi[[i]], bernoulliKernel) %>% list()
+    R[i] = outer(Xi[[i]], Xi[[i]], bernoulliKernel) %>% list()
+    phi[i] = outer(Xi[[i]], xi[[i]], bernoulliKernel) %>% list()
   }
   
-  
   R <- mprodId(kernel = R)
+  phi <- mprodId(kernel = phi)
   coef <- { (wmat %*% R) + n*lambda*I} %>% GInv()
   coef <- coef %*% matrix(wmat %*% y)
-  
-  phi <- R
-  
+  phi <- phi
   fHat <- {t(phi) %*% coef } %>% c()
   return(fHat)
 }
 
-fHat_original <- calcFHat(x, fx, bernoulliKernel)
+fHat_original <- calcFHat(X=x, x=xp, bernoulliKernel)
 
 phi_n_original = max(abs(fHat_original))
 
@@ -83,13 +114,13 @@ fHat = c()
 fHat_weighted = c()
 
 for (i in 1:B) {
-  message(paste0("Starting Iteration ", i, "/", B))
+  log_info(paste0("Starting Iteration ", i, "/", B))
   ## Not sure about calc from here
-  modelVals_i = modelSp(functionName, n = n)
+  modelVals_i = modelSp(functionName, n = p)
   xargs_i = modelVals_i$xargs
   xip = modelVals_i$x
   fxip = modelVals_i$fx
-  yi = {b*fxip} + rnorm(n, mean = 0, sd = sd)
+  yi = {b*fxip} + rnorm(p, mean = 0, sd = sd)
   
   # to here (why is this necessary? What is P? Is it different from n?)
   
@@ -97,39 +128,45 @@ for (i in 1:B) {
   w[[i]] <- wi
   wmat = diag(wi)
   
-  fHat[[i]] = calcFHat(xip, fxip, bernoulliKernel)
-  fHat_weighted[[i]] = calcFHat(xip, fxip, bernoulliKernel, wmat)
+  # fHat[[i]] = calcFHat(X=xp, x=xp, kernel=bernoulliKernel) # already calculated above
+  fHat_weighted[[i]] = calcFHat(X=x, x=xip, kernel=bernoulliKernel, wmat=wmat)
   
-  phi_n_star[[i]] = max(abs( fHat_weighted[[i]] - fHat[[i]] ))
+  phi_n_star[i] = max(abs( fHat_weighted[[i]] - fHat_original ))
   
 }
 
+################################ SUMMARY #######################################
 
 ptile.t = quantile(x=unlist(phi_n_star), probs=1-(alpha/2), names=FALSE)
 p.value = sum(unlist(phi_n_star) > phi_n_original) / B
+if(phi_n_original > ptile.t) {
+  status = "Rejected"
+} else {
+    status = "Not_Rejected"}
 
-message(paste0("ptile.t value: ", ptile.t))
-message(paste0("p.value is: ", p.value))
+log_info(paste0("ptile.t value: ", ptile.t))
+log_info(paste0("p.value is: ", p.value))
 
-message(paste0("Compare inequality: ", phi_n_original, " (phi_original)", "  ??  ", ptile.t, " (upper alpha t-quantile)"))
-message(paste0("H0: b=0 is: ", if(phi_n_original > ptile.t) "Rejected" else "Not Rejected"))
-
-
-
-
-
-
-########## H0 didn't get rejection in B=100, 10 (ran about 5 times in this variation)
+log_info(paste0("Compare inequality: ", phi_n_original, " (phi_original)", "  ??  ", ptile.t, " (upper alpha t-quantile)"))
+log_info(paste0("H0: b=0 is: ", status))
 
 
+############################# WRITE TO FILE ####################################
+
+df = data.frame(
+  phi_n_original = phi_n_original, 
+  phi_n_star = phi_n_star, 
+  ptile.t = ptile.t, 
+  p.value = p.value, 
+  status = status
+)
+
+readr::write_csv(df, file = here("Data", f("{runTimeName}.csv")), append = TRUE, col_names = FALSE)
 
 
-
-
-
-
-
-
+log_info(f("File saved: {as.character(here('Data'))}{.Platform$file.sep}{file_name}.csv"))
+log_info(f("File has colnames: {paste(names(df), collapse = ', ')}"))
+log_info("Code Finalized")
 
 
 
