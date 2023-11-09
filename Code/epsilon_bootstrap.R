@@ -15,6 +15,8 @@ if (.Platform$GUI == "RStudio") {
   b = parameters[5]
   runTimeName = args[6]
   jobname = args[7]
+  print(paste("jobid: ", jobid))
+  print(paste("b: ", b))
 }
 
 
