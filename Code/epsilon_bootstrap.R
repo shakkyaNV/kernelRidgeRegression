@@ -7,13 +7,16 @@ if (.Platform$GUI == "RStudio") {
   runTimeName="newLocalRun";parameters = c(1, 2);b=0;B=10;alpha=0.05
 } else {
   args <- commandArgs(TRUE)
-  parameters <- as.numeric(args[1:4])
+  parameters <- as.numeric(args[1:5])
   n = parameters[1]
   sd = parameters[2]
   seed = parameters[3]
   jobid = parameters[4]
-  runTimeName = args[5]
-  jobname = args[6]
+  b = parameters[5]
+  runTimeName = args[6]
+  jobname = args[7]
+  print(paste("jobid: ", jobid))
+  print(paste("b: ", b))
 }
 
 
@@ -45,6 +48,7 @@ log_info(f("Parameters Received: {paste(parameters, collapse = ', ')}"))
 #################################### INPUT #####################################
 
 n = n
+B = 100
 functionName <- "DGP1"
 
 modelVals = modelSp(functionName, n = n)
@@ -158,7 +162,8 @@ df = data.frame(
   phi_n_star = phi_n_star, 
   ptile.t = ptile.t, 
   p.value = p.value, 
-  status = status
+  status = status,
+  b = b
 )
 
 readr::write_csv(df, file = here("Data", f("{runTimeName}.csv")), append = TRUE, col_names = FALSE)
