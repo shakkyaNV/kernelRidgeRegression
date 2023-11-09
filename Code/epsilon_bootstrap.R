@@ -49,6 +49,8 @@ log_info(f("Parameters Received: {paste(parameters, collapse = ', ')}"))
 
 n = n
 B = 100
+alpha = 0.05
+
 functionName <- "DGP1"
 
 modelVals = modelSp(functionName, n = n)
