@@ -15,8 +15,6 @@ if (.Platform$GUI == "RStudio") {
   b = parameters[5]
   runTimeName = args[6]
   jobname = args[7]
-  print(paste("jobid: ", jobid))
-  print(paste("b: ", b))
 }
 
 
@@ -49,6 +47,8 @@ log_info(f("Parameters Received: {paste(parameters, collapse = ', ')}"))
 
 n = n
 B = 100
+alpha = 0.05
+
 functionName <- "DGP1"
 
 modelVals = modelSp(functionName, n = n)
