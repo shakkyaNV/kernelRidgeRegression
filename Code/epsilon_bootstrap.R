@@ -158,6 +158,7 @@ log_info(paste0("H0: b=0 is: ", status))
 ############################# WRITE TO FILE ####################################
 
 df = data.frame(
+  seed = seed,
   phi_n_original = phi_n_original, 
   phi_n_star = phi_n_star, 
   ptile.t = ptile.t, 
