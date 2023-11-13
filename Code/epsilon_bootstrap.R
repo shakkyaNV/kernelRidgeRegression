@@ -18,7 +18,7 @@ if (.Platform$GUI == "RStudio") {
 }
 
 
-library(here)
+suppressMessages(library(here))
 suppressMessages(source(here("Code", "utils.R")))
 suppressMessages(library(logger, quietly = TRUE))
 suppressMessages(source(here("Code", "gcv.R")))
