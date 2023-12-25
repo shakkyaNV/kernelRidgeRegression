@@ -3,7 +3,7 @@ library(tidyverse)
 library(here)
 source(here("Code", "utils.R"))
 
-file_name = "SleepToken.csv"
+file_name = "Charitha.csv"
 
 
 print(f("scp sranasin@quanah.hpcc.ttu.edu:/home/sranasin/kernelRidgeRegression/Data/{file_name} ."))
@@ -11,7 +11,10 @@ print(f("scp sranasin@quanah.hpcc.ttu.edu:/home/sranasin/kernelRidgeRegression/D
 ## --Pull the file in terminal -- ##
 
 df = readr::read_csv(here("Data", file_name), 
-                     col_names = c("seed", "phi_n_original", "phi_n_star", "ptile.t", "p.value", "status", "b"))
+                     col_names = c("seed", "phi_n_original", "phi_n_star", "ptile.t", "p.value", "status", "b"), 
+                     col_types = c("d", "d", "d", "d", "d", "c", "d"), 
+                     )
+
 df %>% 
   head()
 
@@ -20,6 +23,8 @@ df %>%
 df %>% filter(!is.na(b)) -> dfnew
 
 dfnew %>% filter(status %in% c("Rejected", "Not_Rejected")) -> dfnew
+
+dfnew %>% transmute(b = as.numeric(b), p.value = as.numeric(p.value)) -> dfnew
 
 ####### Test
 
@@ -33,13 +38,13 @@ dfnew %>% head()
 
 dfnew %>% select(p.value, b) %>% 
   group_by(b) %>% 
-  summarise(p.value = mean(p.value)) %>% 
+  summarise(p.value = mean(p.value, na.rm=TRUE)) %>% 
   ggplot(aes(x = b, y = p.value)) + 
   geom_point()
 
 ### WORKING
 
-
+### Charitha starting curve at -0.0035
 
 
 
