@@ -24,7 +24,7 @@ df %>% filter(!is.na(b)) -> dfnew
 
 dfnew %>% filter(status %in% c("Rejected", "Not_Rejected")) -> dfnew
 
-dfnew %>% transmute(b = as.numeric(b), p.value = as.numeric(p.value)) -> dfnew
+# dfnew %>% transmute(b = as.numeric(b), p.value = as.numeric(p.value)) -> dfnew
 
 ####### Test
 
@@ -40,6 +40,7 @@ dfnew %>% select(p.value, b) %>%
   group_by(b) %>% 
   summarise(p.value = mean(p.value, na.rm=TRUE)) %>% 
   ggplot(aes(x = b, y = p.value)) + 
+  geom_path() + 
   geom_point()
 
 ### WORKING
