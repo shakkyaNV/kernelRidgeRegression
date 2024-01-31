@@ -28,20 +28,20 @@ dfnew %>% filter(status %in% c("Rejected", "Not_Rejected")) -> dfnew
 
 ####### Test
 
-dfnew %>% group_by(status) %>% summarise(count = n())
-
-dfnew %>% filter(b != 0) %>% group_by(status) %>% summarise(count = n())
-
-####### viz
-
-dfnew %>% head()
-
-dfnew %>% select(p.value, b) %>% 
-  group_by(b) %>% 
-  summarise(p.value = mean(p.value, na.rm=TRUE)) %>% 
-  ggplot(aes(x = b, y = p.value)) + 
-  geom_path() + 
-  geom_point()
+# dfnew %>% group_by(status) %>% summarise(count = n())
+# 
+# dfnew %>% filter(b != 0) %>% group_by(status) %>% summarise(count = n())
+# 
+# ####### viz
+# 
+# dfnew %>% head()
+# 
+# dfnew %>% select(p.value, b) %>% 
+#   group_by(b) %>% 
+#   summarise(p.value = mean(p.value, na.rm=TRUE)) %>% 
+#   ggplot(aes(x = b, y = p.value)) + 
+#   geom_path() + 
+#   geom_point()
 
 ### WORKING
 
@@ -49,9 +49,20 @@ dfnew %>% select(p.value, b) %>%
 
 
 
+### proportions
+dfnew %>% group_by(b) %>% summarize(n = n()) -> dfN
+dfnew %>% group_by(b, status) %>% summarize(prop = n()) -> dfM
+dfM %>% left_join(dfN, by = "b") %>% mutate(freq = prop/ n) -> dfprops
 
-
-
+dfprops %>% 
+  filter(status == 'Rejected') %>% 
+  ungroup()  %>%
+  select(b, freq) %>% 
+  add_row(b=0, freq=0) %>%
+  arrange(desc(b)) %>% 
+  ggplot(aes(x=b, y=freq)) + 
+  geom_point() + 
+  geom_line()
 
 
 
