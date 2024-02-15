@@ -4,7 +4,7 @@ source ~/.bashrc
 randomseed=$1
 filename=$2
 runTimeName=$3
-sd=0.5
+sd=0.05
 
 module load intel R
 
