@@ -13,7 +13,7 @@ fi
 JOB_NAME='epsilon_bootstrap'
 APPEND=$(date +'%H-%M-%b-%d-%Y')
 
-for i in {001..500};
+for i in {001..50};
 do
   sbatch              \
     --job-name=$JOB_NAME \

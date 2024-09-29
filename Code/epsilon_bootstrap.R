@@ -15,7 +15,7 @@ if (.Platform$GUI == "RStudio") {
   b = parameters[5]
   runTimeName = args[6]
   jobname = args[7]
-  B=500
+  B=100
 }
 
 
@@ -168,7 +168,7 @@ df = data.frame(
   b = b
 )
 
-readr::write_csv(df, file = here("Data", f("{runTimeName}_{jobid}.csv")), append = TRUE, col_names = FALSE)
+readr::write_csv(df, file = here("Data", f("{runTimeName}.csv")), append = TRUE, col_names = FALSE)
 
 
 log_info(f("File saved: {as.character(here('Data'))}{.Platform$file.sep}{file_name}.csv"))
