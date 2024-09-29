@@ -4,7 +4,7 @@ rm(list = ls())
 
 if (.Platform$GUI == "RStudio") {
   n=100;sd=0.01;seed=12;jobid=010;jobname="testAll";
-  runTimeName="newLocalRun";parameters = c(1, 2);b=0;B=10;alpha=0.05
+  runTimeName="newLocalRun";parameters = c(1, 2);b=0;B=100;alpha=0.1
 } else {
   args <- commandArgs(TRUE)
   parameters <- as.numeric(args[1:5])
