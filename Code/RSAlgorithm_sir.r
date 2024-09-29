@@ -53,3 +53,8 @@ plot(fd$x,fhat-mean(fhat),col="blue", type="l")
 
 f0=f(newx)
 lines(newx, f0-mean(f0))
+
+# 
+# hist(x.sim, probability=TRUE, breaks=100)
+# lines(newx, exp(f0 - mean(f0)), col="blue", lwd=2)
+
