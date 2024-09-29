@@ -63,9 +63,11 @@ testAR <- function(n) {
   y = sim.fun(n)
   x = seq(0, 1, length.out=n)
   
-  hist(y$realizations, prob=T, breaks=50)
+  
+  # Histogram of P(x)
+  hist(y$realizations, prob=T, breaks=50, 
+       main = "Histogram of p(x): (Blue is AR)")
   lines(x, log(p(x)), col = "blue", lwd=2)
-  title("Histogram of p(x): (Blue is AR)")
   
   newx = seq(0, 1, length = 100)
   
@@ -75,7 +77,7 @@ testAR <- function(n) {
   
   f0 = f(newx)
   
-  # hist(y$realizations, probability = T, breaks= 50)
+  # Plot of after converting p(x) to f(x)
   plot(fd$x, fhat-mean(fhat), col = "black", type="l")
   lines(newx, f0 - mean(f0), lwd=2, col = "blue")
   title("Plot of f(x): (Blue is AR)")
