@@ -1,8 +1,8 @@
-here::i_am("Code/Accept_Reject.R")
-library(here)
-library(magrittr)
+# here::i_am("Code/Accept_Reject.R")
+# library(here)
+require(magrittr)
+require(here)
 
-n=1000
 # target function
 f <- function(x) {
   # if (all((x<1) && (x>0))) {
