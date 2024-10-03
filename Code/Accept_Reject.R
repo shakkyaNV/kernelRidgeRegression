@@ -7,9 +7,8 @@ require(here)
 f <- function(x) {
   # if (all((x<1) && (x>0))) {
     s = dbeta(x, 5, 20) + dbeta(x, 30, 5)
+    s = -1*s/4
     return(s)
-  # }
-  # else{return(0)}
 }
 
 p <- function(x){
@@ -62,19 +61,18 @@ sim.fun <- function(n) {
 testAR <- function(n) {
   y = sim.fun(n)
   x = seq(0, 1, length.out=n)
-  
+  fglue <- glue::glue
   
   # Histogram of P(x)
-  hist(y$realizations, prob=T, breaks=50, 
-       main = "Histogram of p(x): (Blue is AR)")
-  lines(x, log(p(x)), col = "blue", lwd=2)
+  # hist(y$realizations, prob=T, breaks=50,
+  #      main = "Histogram of p(x): (Blue is AR)")
+  # lines(x, log(p(x) -mean(p(x))), col = "blue", lwd=2)
   
-  newx = seq(0, 1, length = 100)
+  newx = seq(0, 1, length = n)
   
   d = density(y$realizations, from=0, to=1, bw=0.02)
   fd = approx(d$x, d$y, xout=newx)
   fhat = fd$y %>% log()
-  
   f0 = f(newx)
   
   # Plot of after converting p(x) to f(x)
