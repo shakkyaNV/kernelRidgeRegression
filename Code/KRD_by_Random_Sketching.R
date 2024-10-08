@@ -43,7 +43,7 @@ c_hat_KRD = result$getValue(c)
 # as a kernel ridge density estimator
 x_new = seq(0, 1, length.out = 100)
 temp_y = outer(x_new, x, FUN = bernoulliKernel)
-fitted_values = temp_y %*% c_hat_KRD ### Dimension Error
+fitted_values = temp_y %*% t(sketching_matrix) %*% c_hat_KRD ### Dimension Error
 
 
 # Actual values from the function itself
@@ -60,7 +60,7 @@ p_x = p(x_new)
 # Plot 
 plot(x_new, fitted_values - mean(fitted_values), type = "l", col = "red")
 lines(x_new, f(x_new) - mean(f(x_new)), col = "blue")
-title("Blue is function f(x) values, Red is RKD")
+title("Blue is function f(x) values, Red is RKD by Random Sketching")
 
 
 
